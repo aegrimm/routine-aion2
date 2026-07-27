@@ -264,6 +264,10 @@
   .rift-row-time { color:#e8e3f0; font-weight:600; }
   .rift-row-day { color:#7c9fd4; font-size:12px; margin-left:8px; }
   .rift-row-cd { font-family:'Courier New', monospace; color:#8b8299; }
+  .rift-row-right { display:flex; align-items:center; gap:8px; }
+  .rift-bell { background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; width: 26px; height: 26px; font-size: 12px; cursor: pointer; display:flex; align-items:center; justify-content:center; color:#544b68; flex-shrink:0; }
+  .rift-bell.armed { border-color: #c47ed4; background: rgba(196,126,212,0.15); }
+  .rift-bell:hover { border-color: #c47ed4; }
   .rift-footer { font-size:11px; color:#8b8299; font-style:italic; margin-top:14px; line-height:1.5; }
   .rift-toggle-btn { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: #8b8299; border-radius: 8px; padding: 4px 10px; font-size: 12px; cursor: pointer; flex-shrink: 0; }
   .rift-toggle-btn:hover { border-color: #c47ed4; color: #c47ed4; }
@@ -628,6 +632,56 @@ function getRiftWindows(count){
 }
 
 const RIFT_HIDDEN_KEY = 'aion2-rift-hidden';
+const RIFT_REMINDERS_KEY = 'aion2-rift-reminders';
+const RIFT_REMINDER_LEAD_MIN = 5;
+let riftReminders = loadJSON(RIFT_REMINDERS_KEY, {});
+const riftReminderTimeouts = {};
+
+function toggleRiftReminder(startTs){
+  if (!('Notification' in window)){ alert("Les notifications ne sont pas supportées par ce navigateur."); return; }
+  const key = String(startTs);
+  if (riftReminders[key]){
+    delete riftReminders[key];
+    saveJSON(RIFT_REMINDERS_KEY, riftReminders);
+    if (riftReminderTimeouts[key]){ clearTimeout(riftReminderTimeouts[key]); delete riftReminderTimeouts[key]; }
+    renderRiftCard();
+    return;
+  }
+  Notification.requestPermission().then(perm => {
+    if (perm !== 'granted'){ alert("Permission refusée — impossible d'activer le rappel."); return; }
+    riftReminders[key] = true;
+    saveJSON(RIFT_REMINDERS_KEY, riftReminders);
+    scheduleRiftReminder(startTs);
+    renderRiftCard();
+  });
+}
+
+function scheduleRiftReminder(startTs){
+  const key = String(startTs);
+  if (riftReminderTimeouts[key]) return;
+  const fireAt = startTs - RIFT_REMINDER_LEAD_MIN * 60000;
+  const delay = fireAt - Date.now();
+  if (delay <= 0){
+    // window already too close or passed — drop the stale reminder
+    delete riftReminders[key];
+    saveJSON(RIFT_REMINDERS_KEY, riftReminders);
+    return;
+  }
+  riftReminderTimeouts[key] = setTimeout(() => {
+    if (riftReminders[key] && 'Notification' in window && Notification.permission === 'granted'){
+      new Notification('Aion 2 — Spacetime Rift bientôt', { body: `Le portail s'ouvre dans ${RIFT_REMINDER_LEAD_MIN} minutes.` });
+    }
+    delete riftReminders[key];
+    saveJSON(RIFT_REMINDERS_KEY, riftReminders);
+    delete riftReminderTimeouts[key];
+  }, delay);
+}
+
+function restoreRiftReminders(){
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  Object.keys(riftReminders).forEach(key => scheduleRiftReminder(Number(key)));
+}
+
 function toggleRiftCard(){
   const hidden = !loadJSON(RIFT_HIDDEN_KEY, false);
   saveJSON(RIFT_HIDDEN_KEY, hidden);
@@ -665,9 +719,14 @@ function renderRiftCard(){
 
   const rowsHtml = windows.map((w, i) => {
     const isNext = i === 0;
+    const ts = w.start.getTime();
+    const armed = !!riftReminders[String(ts)];
     return `<div class="rift-row${isNext ? ' is-next' : ''}">
       <div><span class="rift-row-time">${timeFmt(w.start)} - ${timeFmt(w.end)}</span><span class="rift-row-day">${w.dayLabel}</span></div>
-      <span class="rift-row-cd">${formatCountdownShort(w.start.getTime() - now)}</span>
+      <div class="rift-row-right">
+        <span class="rift-row-cd">${formatCountdownShort(ts - now)}</span>
+        <button class="rift-bell${armed ? ' armed' : ''}" title="${armed ? 'Rappel activé' : 'Activer un rappel'}" onclick="toggleRiftReminder(${ts})">${armed ? '🔔' : '🔕'}</button>
+      </div>
     </div>`;
   }).join('');
 
@@ -1081,6 +1140,7 @@ document.querySelector('.tabs').setAttribute('role','tablist');
 render();
 enhancedTimerHandle=setInterval(refreshEnhancedTimers,1000);
 setInterval(renderRiftCard,1000);
+restoreRiftReminders();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshEnhancedTimers();});
 
 </script>
