@@ -44,6 +44,7 @@
     <div id="abyssRiftCard"></div>
   </div>
   <div class="dashboard" id="dashboard"></div>
+  <div class="weekly-planner" id="weeklyPlanner"></div>
   <div id="blocksContainer"></div>
   <div class="history-modal" id="historyModal" role="dialog" aria-modal="true" aria-label="Historique"><div class="modal-card" id="historyContent"></div></div>
   <div class="toast" id="toast"></div>
@@ -450,6 +451,88 @@
       margin-bottom: 20px;
     }
   }
+
+
+  /* ===== Ajouts 8 à 13 ===== */
+  .weekly-planner,.season-panel{margin:18px 0 22px;display:grid;gap:14px}
+  .planner-card,.season-card{background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(196,126,212,.045));border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:16px 18px;box-shadow:0 10px 30px rgba(0,0,0,.14)}
+  .planner-head,.season-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .planner-title,.season-title{font-weight:800;font-size:14px;color:#eee9f5}.planner-sub,.season-sub{font-size:11px;color:#8b8299}
+  .week-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+  .week-day{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);border-radius:11px;padding:9px 7px;text-align:center;min-width:0}
+  .week-day.today{border-color:rgba(79,209,197,.55);background:rgba(79,209,197,.09)}
+  .week-name{font-size:10px;font-weight:800;color:#8b8299;text-transform:uppercase}.week-date{font-family:'Courier New',monospace;font-size:16px;font-weight:800;margin:4px 0;color:#d8d3e0}.week-count{font-size:10px;color:#4fd1c5}
+  .reset-meter{margin-top:13px}.reset-meter-head{display:flex;justify-content:space-between;font-size:11px;color:#8b8299;margin-bottom:7px}.reset-meter-track{height:7px;border-radius:8px;background:rgba(255,255,255,.06);overflow:hidden}.reset-meter-fill{height:100%;background:linear-gradient(90deg,#4fd1c5,#7c9fd4,#c47ed4)}
+  .season-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.season-event{border:1px solid rgba(224,164,88,.22);background:rgba(224,164,88,.055);border-radius:13px;padding:13px}.season-event.expired{opacity:.5;filter:saturate(.45)}
+  .season-event-top{display:flex;justify-content:space-between;gap:10px}.season-event-name{font-weight:800;color:#f1e8db}.season-event-countdown{font-family:'Courier New',monospace;color:#e0a458;font-size:11px;font-weight:700}.season-task{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:12px;color:#cfc7d8}.season-task input{accent-color:#e0a458}
+  .season-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.mini-action{border:1px solid rgba(255,255,255,.12);background:transparent;color:#9c93aa;border-radius:8px;padding:5px 8px;font-size:10px;cursor:pointer}.mini-action:hover{color:#4fd1c5;border-color:#4fd1c5}
+  .context-links{display:inline-flex;gap:5px;margin-left:9px;vertical-align:middle}.context-link{font-size:10px;text-decoration:none;color:#7c9fd4;border:1px solid rgba(124,159,212,.28);padding:3px 6px;border-radius:7px;background:rgba(124,159,212,.06)}.context-link:hover{color:#4fd1c5;border-color:#4fd1c5}
+  .char-profile-grid{display:grid;grid-template-columns:repeat(6,minmax(90px,1fr));gap:8px;margin-top:10px;padding-left:80px}.char-field{display:flex;flex-direction:column;gap:4px}.char-field label{font-size:9px;text-transform:uppercase;letter-spacing:.7px;color:#6f667e}.char-field input,.char-field select{width:100%;border:1px solid rgba(255,255,255,.1);background:#151125;color:#d8d3e0;border-radius:8px;padding:7px 8px;font-size:11px;outline:none}.char-field input:focus,.char-field select:focus{border-color:#4fd1c5}.char-main-toggle{display:flex;align-items:center;gap:6px;font-size:11px;color:#9d94aa;padding-top:17px}.char-main-toggle input{accent-color:#4fd1c5}
+  .rift-card{overflow:hidden}.rift-status-line{display:flex;align-items:center;gap:7px;font-size:10px;text-transform:uppercase;letter-spacing:.8px;font-weight:800}.rift-status-dot{width:8px;height:8px;border-radius:50%;background:#7c9fd4;box-shadow:0 0 12px currentColor}.rift-card.portal-open .rift-status-dot{background:#59ffc4}.rift-card.portal-open{box-shadow:0 0 0 1px rgba(89,255,196,.65),0 0 26px rgba(89,255,196,.18)}.rift-card.urgent .rift-status-dot{background:#e0a458}.rift-ring{--p:0;position:relative;width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#4fd1c5 calc(var(--p)*1%),rgba(255,255,255,.07) 0)}.rift-ring:before{content:'';position:absolute;inset:7px;border-radius:50%;background:#181329}.rift-ring-content{position:relative;text-align:center}.rift-ring-time{font-family:'Courier New',monospace;font-size:13px;font-weight:900;color:#d8d3e0}.rift-ring-label{font-size:8px;color:#776e85;text-transform:uppercase}.rift-compact-schedule{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.rift-slot-chip{border:1px solid rgba(255,255,255,.09);border-radius:8px;padding:5px 7px;font-size:10px;color:#91889f}.rift-details summary{cursor:pointer;color:#7c9fd4;font-size:10px;margin-top:10px}.rift-details[open] summary{margin-bottom:6px}
+  @media(max-width:900px){.week-strip{grid-template-columns:repeat(4,1fr)}.season-grid{grid-template-columns:1fr}.char-profile-grid{grid-template-columns:repeat(2,1fr);padding-left:0}}
+
+
+
+  /* ===== Mode compact renforcé ===== */
+  .compact body { padding-top:10px; padding-bottom:14px; }
+  .compact .wrap { gap:8px; }
+  .compact header { margin-bottom:8px; }
+  .compact .logo-img { width:58px; height:58px; }
+  .compact h1 { font-size:20px; margin:0; }
+  .compact .subtitle { font-size:10px; margin-top:1px; }
+  .compact .tabs { margin:8px 0; gap:5px; }
+  .compact .tab { padding:6px 11px; font-size:11px; }
+  .compact .app-toolbar { gap:5px; margin:7px 0 9px; }
+  .compact .tool-btn { padding:5px 8px; font-size:10px; min-height:27px; }
+  .compact .dashboard { gap:7px; margin-bottom:9px; }
+  .compact .dash-card { padding:9px 11px; border-radius:11px; }
+  .compact .dash-title { font-size:11px; margin-bottom:5px; }
+  .compact .now-list,.compact .char-progress-list { gap:3px; }
+  .compact .now-item { padding:3px 0; font-size:10px; }
+  .compact .char-progress-row { gap:6px; font-size:9px; }
+  .compact .block { margin-bottom:6px; border-radius:11px; padding:9px 10px; }
+  .compact .block-head { margin-bottom:1px; gap:7px; }
+  .compact .block-icon { width:28px; height:28px; font-size:15px; }
+  .compact .block-title { font-size:12px; }
+  .compact .block-time,.compact .block-note { font-size:9px; line-height:1.2; }
+  .compact .block-note-enhanced { margin-bottom:2px; }
+  .compact .block-note-enhanced details { font-size:9px; }
+  .compact .task-row { padding:4px 7px; min-height:31px; }
+  .compact .task-label { font-size:10px; line-height:1.15; }
+  .compact .char-slots { gap:4px; }
+  .compact .char-slot { min-width:32px; }
+  .compact .slot-controls { gap:2px; }
+  .compact .checkbox,.compact .miss-btn { height:21px; min-height:21px; }
+  .compact .checkbox { width:21px; font-size:9px; border-radius:6px; }
+  .compact .miss-btn { width:16px; font-size:8px; border-radius:5px; }
+  .compact .qty-badge,.compact .missed-badge { font-size:8px; margin-top:1px; }
+  .compact .pvp-timer { padding:4px 7px; margin:3px 0; font-size:9px; }
+  .compact .remind-btn { padding:3px 6px; font-size:8px; }
+  .compact #eventSidebar > div { margin-bottom:8px; }
+  .compact .rift-card { padding:10px 11px; border-radius:11px; }
+  .compact .rift-head { margin-bottom:7px; gap:7px; }
+  .compact .rift-icon { width:28px; height:28px; font-size:15px; }
+  .compact .rift-title { font-size:12px; }
+  .compact .rift-subtitle,.compact .rift-status-line { font-size:8px; }
+  .compact .rift-toggle-btn { padding:2px 7px; font-size:9px; }
+  .compact .rift-hero { padding:7px 9px; margin-bottom:6px; border-radius:8px; gap:6px; }
+  .compact .rift-next-label,.compact .rift-window-label,.compact .rift-window-day { font-size:8px; }
+  .compact .rift-countdown-big { font-size:18px; }
+  .compact .rift-window-value { font-size:11px; }
+  .compact .rift-list-title { font-size:8px; margin:5px 0 3px; }
+  .compact .rift-row { padding:4px 2px; font-size:10px; }
+  .compact .rift-row-day { font-size:8px; margin-left:4px; }
+  .compact .rift-row-cd { font-size:9px; }
+  .compact .rift-bell { width:21px; height:21px; font-size:9px; border-radius:6px; }
+  .compact .rift-footer { margin-top:6px; font-size:8px; line-height:1.25; }
+  .compact .rift-ring { width:65px; height:65px; }
+  .compact .rift-ring:before { inset:5px; }
+  .compact .rift-ring-time { font-size:10px; }
+  .compact .rift-ring-label { font-size:6px; }
+  .compact .rift-compact-schedule { gap:3px; margin-top:4px; }
+  .compact .rift-slot-chip { padding:3px 4px; font-size:7px; border-radius:5px; }
+  .compact .rift-details summary { font-size:8px; margin-top:5px; }
+
 </style>
 <script>
 const ICONS = {
@@ -1409,15 +1492,52 @@ render=function(){
   renderAllEventCards();
 };
 
+
+
+/* ===== Fonctionnalités 8 à 13 ===== */
+const CHAR_PROFILE_KEY='aion2-character-profiles-v1';
+let charProfiles=loadJSON(CHAR_PROFILE_KEY,{});
+const SEASON_KEY='aion2-season-events-v1';
+const DEFAULT_SEASON_EVENTS=[
+  {id:'summer',name:'Événement saisonnier',start:'2026-07-27T05:00:00',end:'2026-08-10T05:00:00',tasks:['Mission quotidienne','Boutique événement','Récompense de connexion']},
+  {id:'pass',name:'Pass / objectifs limités',start:'2026-07-27T05:00:00',end:'2026-08-17T05:00:00',tasks:['Récompenses gratuites','Récompenses premium','Objectif hebdomadaire']}
+];
+let seasonEvents=loadJSON(SEASON_KEY,DEFAULT_SEASON_EVENTS);
+const GUIDE_MAP={
+};
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function getCharProfile(id){const c=getChar(id)||{};return {level:50,itemLevel:3000,faction:'Elyos',main:id==='main',server:'Aegrim',...charProfiles[id],name:c.name||id};}
+function updateCharProfile(id,key,value){charProfiles[id]={...getCharProfile(id),[key]:key==='level'||key==='itemLevel'?Number(value||0):value};if(key==='main'&&value){Object.keys(charProfiles).forEach(k=>charProfiles[k].main=false);charProfiles[id].main=true;}saveJSON(CHAR_PROFILE_KEY,charProfiles);render();}
+function renderWeeklyPlanner(){}
+function seasonTaskKey(eid,idx){return `aion2-season-task:${eid}:${idx}`}
+function toggleSeasonTask(eid,idx){localStorage.setItem(seasonTaskKey(eid,idx),localStorage.getItem(seasonTaskKey(eid,idx))==='1'?'0':'1');renderSeasonPanel();}
+function editSeasonEvent(id){const e=seasonEvents.find(x=>x.id===id);if(!e)return;const name=prompt('Nom de l’événement',e.name);if(name===null)return;const end=prompt('Fin (AAAA-MM-JJTHH:MM)',e.end.slice(0,16));if(end===null)return;e.name=name.trim()||e.name;e.end=end;saveJSON(SEASON_KEY,seasonEvents);renderSeasonPanel();}
+function renderSeasonPanel(){const el=document.getElementById('seasonPanel');if(!el)return;const now=Date.now();const cards=seasonEvents.map(e=>{const end=new Date(e.end).getTime(),expired=end<=now;const tasks=e.tasks.map((t,i)=>`<label class="season-task"><input type="checkbox" ${localStorage.getItem(seasonTaskKey(e.id,i))==='1'?'checked':''} onchange="toggleSeasonTask('${e.id}',${i})"><span>${esc(t)}</span></label>`).join('');return `<div class="season-event ${expired?'expired':''}"><div class="season-event-top"><div class="season-event-name">${esc(e.name)}</div><div class="season-event-countdown">${expired?'Terminé':'Fin dans '+formatCountdown(end-now)}</div></div>${tasks}<div class="season-actions"><button class="mini-action" onclick="editSeasonEvent('${e.id}')">Modifier</button><a class="mini-action" href="https://aion2.plaync.com/" target="_blank" rel="noopener">Actualités officielles</a></div></div>`}).join('');el.innerHTML=`<div class="season-card"><div class="season-head"><div><div class="season-title">☀ Événements limités</div><div class="season-sub">Dates et objectifs modifiables, enregistrés localement</div></div></div><div class="season-grid">${cards}</div></div>`;}
+function enhanceContextLinks(){document.querySelectorAll('.task-row').forEach(row=>{if(row.querySelector('.context-links'))return;const cb=row.querySelector('.checkbox');if(!cb)return;const onclick=cb.getAttribute('onclick')||'';const m=onclick.match(/toggle\('([^']+)'/);if(!m)return;const cfg=GUIDE_MAP[m[1]];if(!cfg)return;const label=row.querySelector('.task-label');if(label)label.insertAdjacentHTML('beforeend',`<span class="context-links"><a class="context-link" href="${cfg[1]}" target="_blank" rel="noopener">${cfg[0]}</a></span>`);});}
+function enhanceCharacterEditor(){const panel=document.getElementById('editPanel');if(!panel||!editingNames)return;[...panel.children].forEach((node,i)=>{const c=CHARACTERS[i];if(!c||node.querySelector('.char-profile-grid'))return;const p=getCharProfile(c.id);node.insertAdjacentHTML('beforeend',`<div class="char-profile-grid"><div class="char-field"><label>Nom</label><input value="${esc(getChar(c.id).name)}" onchange="charNames['${c.id}']=this.value;saveJSON(CHAR_NAMES_KEY,charNames);render()"></div><div class="char-field"><label>Niveau</label><input type="number" min="1" max="99" value="${p.level}" onchange="updateCharProfile('${c.id}','level',this.value)"></div><div class="char-field"><label>Item level</label><input type="number" min="0" value="${p.itemLevel}" onchange="updateCharProfile('${c.id}','itemLevel',this.value)"></div><div class="char-field"><label>Faction</label><select onchange="updateCharProfile('${c.id}','faction',this.value)"><option ${p.faction==='Elyos'?'selected':''}>Elyos</option><option ${p.faction==='Asmodian'?'selected':''}>Asmodian</option></select></div><div class="char-field"><label>Serveur</label><input value="${esc(p.server)}" onchange="updateCharProfile('${c.id}','server',this.value)"></div><label class="char-main-toggle"><input type="checkbox" ${p.main?'checked':''} onchange="updateCharProfile('${c.id}','main',this.checked)"> Principal</label></div>`);});}
+
+let riftStructureSignature='';
+renderRiftCard=function(force=false){
+  const el=document.getElementById('riftCard');if(!el)return;if(loadJSON(RIFT_HIDDEN_KEY,false)){el.innerHTML=`<div class="rift-collapsed"><span>⚡ Spacetime Rift masqué</span><button class="rift-toggle-btn" onclick="toggleRiftCard()">Réafficher</button></div>`;riftStructureSignature='hidden';return;}
+  const windows=getRiftWindows(8),sig=windows.map(w=>w.start.getTime()).join('|');if(!force&&sig===riftStructureSignature&&el.querySelector('.rift-card')){updateRiftClock();return;}riftStructureSignature=sig;
+  const now=Date.now(),timeFmt=d=>d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),next=windows[0];
+  const chips=windows.slice(0,4).map(w=>`<span class="rift-slot-chip">${timeFmt(w.start)} · ${w.dayLabel}</span>`).join('');
+  const rows=windows.map((w,i)=>{const ts=w.start.getTime(),armed=!!riftReminders[String(ts)];return `<div class="rift-row${i===0?' is-next':''}"><div><span class="rift-row-time">${timeFmt(w.start)} - ${timeFmt(w.end)}</span><span class="rift-row-day">${w.dayLabel}</span></div><div class="rift-row-right"><span class="rift-row-cd" data-rift-row-ts="${ts}"></span><button class="rift-bell${armed?' armed':''}" onclick="toggleRiftReminder(${ts})">${armed?'🔔':'🔕'}</button></div></div>`}).join('');
+  el.innerHTML=`<div class="rift-card"><div class="rift-head"><div class="rift-icon">⚡</div><div style="flex:1"><div class="rift-title">Spacetime Rift</div><div class="rift-status-line"><span class="rift-status-dot"></span><span id="riftStatusText">Calcul…</span></div></div><button class="rift-toggle-btn" onclick="toggleRiftCard()">✕</button></div><div class="rift-hero"><div class="rift-ring" id="riftRing"><div class="rift-ring-content"><div class="rift-ring-time" id="riftClock">--:--</div><div class="rift-ring-label" id="riftClockLabel">prochain</div></div></div><div><div class="rift-window-label">Prochaine ouverture</div><div class="rift-window-value">${next?timeFmt(next.start):'—'}</div><div class="rift-window-day">${next?next.dayLabel:''}</div><div class="rift-compact-schedule">${chips}</div></div></div><details class="rift-details"><summary>Voir tous les horaires</summary>${rows}<div class="rift-footer">Portail ouvert pendant 5 minutes, événement actif pendant 1 heure.</div></details></div>`;updateRiftClock();
+};
+function updateRiftClock(){const card=document.querySelector('#riftCard .rift-card');if(!card)return;const now=new Date(),hours=RIFT_HOURS.slice().sort((a,b)=>a-b);let activeStart=null,nextStart=null;for(let d=-1;d<=1;d++)for(const h of hours){const st=new Date(now.getFullYear(),now.getMonth(),now.getDate()+d,h);const en=new Date(st.getTime()+RIFT_DURATION_MIN*60000);if(st<=now&&now<en)activeStart=st;if(st>now&&(!nextStart||st<nextStart))nextStart=st;}const portalOpen=activeStart&&now<new Date(activeStart.getTime()+RIFT_PORTAL_MIN*60000);let target,label,status,pct=0;if(portalOpen){target=new Date(activeStart.getTime()+RIFT_PORTAL_MIN*60000);label='portail';status='PORTAIL OUVERT';pct=((now-activeStart)/(RIFT_PORTAL_MIN*60000))*100;}else if(activeStart){target=new Date(activeStart.getTime()+RIFT_DURATION_MIN*60000);label='fin';status='ÉVÉNEMENT EN COURS · PORTAIL FERMÉ';pct=((now-activeStart)/(RIFT_DURATION_MIN*60000))*100;}else{target=nextStart;label='prochain';status='PROCHAIN RIFT';const prev=new Date(nextStart.getTime()-3*3600000);pct=((now-prev)/(nextStart-prev))*100;}card.classList.toggle('portal-open',!!portalOpen);card.classList.toggle('urgent',!activeStart&&target-now<30*60000);document.getElementById('riftStatusText').textContent=status;document.getElementById('riftClock').textContent=formatCountdown(target-now);document.getElementById('riftClockLabel').textContent=label;document.getElementById('riftRing').style.setProperty('--p',Math.max(0,Math.min(100,pct)));document.querySelectorAll('[data-rift-row-ts]').forEach(x=>x.textContent=formatCountdownShort(Number(x.dataset.riftRowTs)-Date.now()));}
+
+const renderBefore813=render;
+render=function(){renderBefore813();renderWeeklyPlanner();enhanceContextLinks();enhanceCharacterEditor();renderRiftCard();};
+function masterTick(){refreshEnhancedTimers();updateRiftClock();renderAllEventCards();if(new Date().getSeconds()===0){renderWeeklyPlanner();renderRiftCard();}}
+
 migrateStorage(); applySettings();
 document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 document.getElementById('tabDaily').setAttribute('role','tab'); document.getElementById('tabWeekly').setAttribute('role','tab');
 document.querySelector('.tabs').setAttribute('role','tablist');
 render();
-enhancedTimerHandle=setInterval(refreshEnhancedTimers,1000);
-setInterval(renderRiftCard,1000);
-setInterval(renderAllEventCards,1000);
+enhancedTimerHandle=setInterval(masterTick,1000);
 restoreRiftReminders();
 restoreGenericReminders();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshEnhancedTimers();});
