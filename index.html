@@ -58,8 +58,8 @@
   .wrap { max-width: 720px; margin: 0 auto; }
   @media (min-width: 980px) {
     .wrap { max-width: 1180px; }
-    #blocksContainer { display: grid; grid-template-columns: repeat(2, minmax(0, 560px)); gap: 4px 40px; justify-content: center; align-items: start; }
-    #blocksContainer .block { margin-bottom: 18px; }
+    #blocksContainer { column-count: 2; column-width: 560px; column-gap: 40px; }
+    #blocksContainer .block { break-inside: avoid; margin-bottom: 18px; display: inline-block; width: 100%; }
     .progress-box, .chips, .edit-panel, .summary-box, .reset-btn, .footer-note, .footer-copy { max-width: 720px; margin-left: auto; margin-right: auto; }
     .reset-btn { display: block; }
   }
