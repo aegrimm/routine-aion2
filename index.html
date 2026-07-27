@@ -422,15 +422,32 @@ function formatCountdown(ms){
   return `${mins}min`;
 }
 
-const reminderArmed = {};
+const REMINDER_ARMED_KEY = 'aion2-reminders-armed';
+let reminderArmed = loadJSON(REMINDER_ARMED_KEY, {});
 const timerIntervals = {};
 function armReminder(blockId, daysOfWeek, hour){
   if (!('Notification' in window)){ alert("Les notifications ne sont pas supportées par ce navigateur."); return; }
+  if (reminderArmed[blockId]){
+    reminderArmed[blockId] = false;
+    saveJSON(REMINDER_ARMED_KEY, reminderArmed);
+    render();
+    return;
+  }
   Notification.requestPermission().then(perm => {
     if (perm !== 'granted'){ alert("Permission refusée — impossible d'activer le rappel."); return; }
     reminderArmed[blockId] = true;
+    saveJSON(REMINDER_ARMED_KEY, reminderArmed);
     scheduleReminder(blockId, daysOfWeek, hour);
     render();
+  });
+}
+
+function restoreArmedReminders(){
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  WEEKLY_BLOCKS.forEach(block => {
+    if (block.pvpDays && reminderArmed[block.id]){
+      scheduleReminder(block.id, block.pvpDays, block.pvpHour);
+    }
   });
 }
 
@@ -629,6 +646,7 @@ function render(){
 document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 render();
+restoreArmedReminders();
 </script>
 </body>
 </html>
