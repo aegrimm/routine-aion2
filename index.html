@@ -981,7 +981,7 @@ function renderEventCard(cfg){
     el.innerHTML = `<div class="rift-collapsed"><span>${cfg.icon} ${cfg.title} masqué</span><button class="rift-toggle-btn" onclick="toggleEventCard('${cfg.hiddenKey}')">Réafficher</button></div>`;
     return;
   }
-  const windows = getWeeklyEventWindows(cfg.daysOfWeek, cfg.hour, cfg.durationMin, 6);
+  const windows = getWeeklyEventWindows(cfg.daysOfWeek, cfg.hour, cfg.durationMin, 2);
   const now = Date.now();
   const timeFmt = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   const next = windows[0];
