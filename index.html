@@ -39,6 +39,8 @@
 
   <div class="app-toolbar" id="appToolbar"></div>
   <div id="riftCard"></div>
+  <div id="artifactCard"></div>
+  <div id="abyssRiftCard"></div>
   <div class="dashboard" id="dashboard"></div>
   <div id="blocksContainer"></div>
   <div class="history-modal" id="historyModal" role="dialog" aria-modal="true" aria-label="Historique"><div class="modal-card" id="historyContent"></div></div>
@@ -525,11 +527,11 @@ const WEEKLY_BLOCKS = [
   { id:'w7', priority:6, time:'Flexible', title:'Supply Request', icon:'shoppingbag',
     note:"Fournir des objets (récupérables via Shugo Festa) contre des points Abyss — pas de reset fixe identifié, à faire quand tu as le stock",
     tasks:[{ id:'supply', label:'Supply Request', chars:['main'] }] },
-  { id:'w8', priority:7, time:'Mercredi & samedi 16h (heure FR)', title:'Artifact Conquest (Siège)', icon:'users', pvpDays:[3,6], pvpHour:16,
-    note:"PvP de siège programmé — horaire converti depuis 22h heure serveur Taïwan (-6h)",
+  { id:'w8', priority:7, time:'Mercredi & samedi 16h (heure FR)', title:'Artifact Conquest (Siège)', icon:'users',
+    note:"PvP de siège programmé — voir la carte dédiée en haut de page pour le compte à rebours",
     tasks:[{ id:'artifact-conquest', label:'Artifact Conquest', chars:['main'], qty:{main:'2'} }] },
-  { id:'w9', priority:8, time:'Mardi & jeudi 16h (heure FR)', title:'Abyss Rift Zone', icon:'swords', pvpDays:[2,4], pvpHour:16,
-    note:"PvP par matching, niveau 45+ et Item Level 3000+ requis — horaire converti depuis 22h heure serveur Taïwan (-6h)",
+  { id:'w9', priority:8, time:'Mardi & jeudi 16h (heure FR)', title:'Abyss Rift Zone', icon:'swords',
+    note:"PvP par matching, niveau 45+ et Item Level 3000+ requis — voir la carte dédiée en haut de page pour le compte à rebours",
     tasks:[{ id:'abyss-rift', label:'Abyss Rift Zone', chars:['main'], qty:{main:'2'} }] },
   { id:'w4', priority:9, time:'Avant reset mercredi 5h', title:'Boutiques & caps à vider', icon:'shoppingbag',
     note:"Toujours en dernier, juste avant le reset · Odyle Energy cap 560 (840 avec abonnement), régénère 15/3h · budget hebdo total ≈1000/perso (régén + 4 jetons perso) + 640 jetons partagés serveur à répartir · les jetons Wind Breeze se craft désormais, ne s'achètent plus en boutique",
@@ -880,6 +882,144 @@ function renderRiftCard(){
       ${rowsHtml}
       <div class="rift-footer">Le portail pour entrer dans le Spacetime Rift ne reste ouvert que 5 minutes au début de chaque fenêtre. Une fois dedans, l'event dure 1h complète. Activités : combat PvP, Sealed Dungeons, quêtes spéciales et récompenses en points Abyss.</div>
     </div>`;
+}
+
+
+const EVENT_CONFIGS = [
+  {
+    containerId: 'artifactCard', hiddenKey: 'aion2-artifact-hidden', remKeyPrefix: 'artifact:',
+    icon: '👥', title: 'Artifact Conquest (Siège)',
+    subtitle: 'Mercredi & samedi 16h (heure FR) · PvP de siège programmé',
+    daysOfWeek: [3, 6], hour: 16, durationMin: 120,
+    footer: "Horaire converti depuis 22h heure serveur Taïwan (-6h). Siège territorial en groupe."
+  },
+  {
+    containerId: 'abyssRiftCard', hiddenKey: 'aion2-abyssrift-hidden', remKeyPrefix: 'abyssrift:',
+    icon: '⚔️', title: 'Abyss Rift Zone',
+    subtitle: 'Mardi & jeudi 16h (heure FR) · PvP par matching',
+    daysOfWeek: [2, 4], hour: 16, durationMin: 120,
+    footer: "Niveau 45+ et Item Level 3000+ requis. Horaire converti depuis 22h heure serveur Taïwan (-6h)."
+  },
+];
+
+let genericReminders = loadJSON('aion2-generic-reminders', {});
+const genericReminderTimeouts = {};
+
+function getWeeklyEventWindows(daysOfWeek, hour, durationMin, count){
+  const now = new Date();
+  const windows = [];
+  for (let d = 0; windows.length < count && d < 21; d++){
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d, hour, 0, 0, 0);
+    if (daysOfWeek.includes(start.getDay()) && start > now){
+      const end = new Date(start.getTime() + durationMin * 60000);
+      const dayLabel = d === 0 ? "Aujourd'hui" : d === 1 ? 'Demain' : start.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' });
+      windows.push({ start, end, dayLabel });
+    }
+  }
+  return windows.slice(0, count);
+}
+
+function toggleEventCard(hiddenKey){
+  const hidden = !loadJSON(hiddenKey, false);
+  saveJSON(hiddenKey, hidden);
+  renderAllEventCards();
+}
+
+function scheduleGenericReminder(key, ts){
+  if (genericReminderTimeouts[key]) return;
+  const fireAt = ts - 15 * 60000;
+  const delay = fireAt - Date.now();
+  if (delay <= 0){ delete genericReminders[key]; saveJSON('aion2-generic-reminders', genericReminders); return; }
+  genericReminderTimeouts[key] = setTimeout(() => {
+    if (genericReminders[key] && 'Notification' in window && Notification.permission === 'granted'){
+      new Notification('Aion 2 — Event bientôt', { body: "L'event commence dans 15 minutes." });
+    }
+    delete genericReminders[key];
+    saveJSON('aion2-generic-reminders', genericReminders);
+    delete genericReminderTimeouts[key];
+  }, delay);
+}
+
+function toggleGenericReminder(key, ts){
+  if (!('Notification' in window)){ alert("Les notifications ne sont pas supportées par ce navigateur."); return; }
+  if (genericReminders[key]){
+    delete genericReminders[key];
+    saveJSON('aion2-generic-reminders', genericReminders);
+    if (genericReminderTimeouts[key]){ clearTimeout(genericReminderTimeouts[key]); delete genericReminderTimeouts[key]; }
+    renderAllEventCards();
+    return;
+  }
+  Notification.requestPermission().then(perm => {
+    if (perm !== 'granted'){ alert("Permission refusée — impossible d'activer le rappel."); return; }
+    genericReminders[key] = ts;
+    saveJSON('aion2-generic-reminders', genericReminders);
+    scheduleGenericReminder(key, ts);
+    renderAllEventCards();
+  });
+}
+
+function restoreGenericReminders(){
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  Object.entries(genericReminders).forEach(([key, ts]) => scheduleGenericReminder(key, ts));
+}
+
+function renderEventCard(cfg){
+  const el = document.getElementById(cfg.containerId);
+  if (!el) return;
+  const isHidden = loadJSON(cfg.hiddenKey, false);
+  if (isHidden){
+    el.innerHTML = `<div class="rift-collapsed"><span>${cfg.icon} ${cfg.title} masqué</span><button class="rift-toggle-btn" onclick="toggleEventCard('${cfg.hiddenKey}')">Réafficher</button></div>`;
+    return;
+  }
+  const windows = getWeeklyEventWindows(cfg.daysOfWeek, cfg.hour, cfg.durationMin, 6);
+  const now = Date.now();
+  const timeFmt = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const next = windows[0];
+  const heroCountdown = next ? formatCountdown(next.start.getTime() - now) : '—';
+
+  const rowsHtml = windows.map((w, i) => {
+    const isNext = i === 0;
+    const ts = w.start.getTime();
+    const remKey = cfg.remKeyPrefix + ts;
+    const armed = !!genericReminders[remKey];
+    return `<div class="rift-row${isNext ? ' is-next' : ''}">
+      <div><span class="rift-row-time">${timeFmt(w.start)} - ${timeFmt(w.end)}</span><span class="rift-row-day">${w.dayLabel}</span></div>
+      <div class="rift-row-right">
+        <span class="rift-row-cd">${formatCountdownShort(ts - now)}</span>
+        <button class="rift-bell${armed ? ' armed' : ''}" title="${armed ? 'Rappel activé' : 'Activer un rappel'}" onclick="toggleGenericReminder('${remKey}', ${ts})">${armed ? '🔔' : '🔕'}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="rift-card">
+      <div class="rift-head">
+        <div class="rift-icon">${cfg.icon}</div>
+        <div style="flex:1">
+          <div class="rift-title">${cfg.title}</div>
+          <div class="rift-subtitle">${cfg.subtitle}</div>
+        </div>
+        <button class="rift-toggle-btn" onclick="toggleEventCard('${cfg.hiddenKey}')" title="Masquer">✕</button>
+      </div>
+      <div class="rift-hero">
+        <div>
+          <div class="rift-next-label">Prochain event dans</div>
+          <div class="rift-countdown-big">${heroCountdown}</div>
+        </div>
+        ${next ? `<div>
+          <div class="rift-window-label">Prochaine fenêtre</div>
+          <div class="rift-window-value">${timeFmt(next.start)} - ${timeFmt(next.end)}</div>
+          <div class="rift-window-day">${next.dayLabel}</div>
+        </div>` : ''}
+      </div>
+      <div class="rift-list-title">Prochaines occurrences</div>
+      ${rowsHtml}
+      <div class="rift-footer">${cfg.footer}</div>
+    </div>`;
+}
+
+function renderAllEventCards(){
+  EVENT_CONFIGS.forEach(renderEventCard);
 }
 
 const reminderArmed = {};
@@ -1251,6 +1391,7 @@ render=function(){
   if(pv){const t=document.querySelector('.progress-track');t.setAttribute('aria-valuemin','0');t.setAttribute('aria-valuemax',pv[2]);t.setAttribute('aria-valuenow',pv[1]);}
   refreshEnhancedTimers();
   renderRiftCard();
+  renderAllEventCards();
 };
 
 migrateStorage(); applySettings();
@@ -1261,7 +1402,9 @@ document.querySelector('.tabs').setAttribute('role','tablist');
 render();
 enhancedTimerHandle=setInterval(refreshEnhancedTimers,1000);
 setInterval(renderRiftCard,1000);
+setInterval(renderAllEventCards,1000);
 restoreRiftReminders();
+restoreGenericReminders();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshEnhancedTimers();});
 
 </script>
