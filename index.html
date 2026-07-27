@@ -38,9 +38,11 @@
   <div class="edit-panel" id="editPanel"></div>
 
   <div class="app-toolbar" id="appToolbar"></div>
-  <div id="riftCard"></div>
-  <div id="artifactCard"></div>
-  <div id="abyssRiftCard"></div>
+  <div id="eventSidebar">
+    <div id="riftCard"></div>
+    <div id="artifactCard"></div>
+    <div id="abyssRiftCard"></div>
+  </div>
   <div class="dashboard" id="dashboard"></div>
   <div id="blocksContainer"></div>
   <div class="history-modal" id="historyModal" role="dialog" aria-modal="true" aria-label="Historique"><div class="modal-card" id="historyContent"></div></div>
@@ -355,7 +357,7 @@
       gap: 22px 24px;
     }
 
-    #riftCard {
+    #eventSidebar {
       position: fixed;
       z-index: 500;
       top: 22px;
@@ -365,10 +367,13 @@
       overflow-y: auto;
       overscroll-behavior: contain;
       scrollbar-gutter: stable;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    #riftCard .rift-card,
-    #riftCard .rift-collapsed {
+    #eventSidebar .rift-card,
+    #eventSidebar .rift-collapsed {
       width: 100%;
       margin: 0;
       box-shadow: 0 18px 55px rgba(0,0,0,.42), 0 0 0 1px rgba(196,126,212,.06);
@@ -376,47 +381,47 @@
       -webkit-backdrop-filter: blur(16px);
     }
 
-    #riftCard .rift-card {
+    #eventSidebar .rift-card {
       padding: 15px 16px;
     }
 
-    #riftCard .rift-head {
+    #eventSidebar .rift-head {
       margin-bottom: 12px;
     }
 
-    #riftCard .rift-title {
+    #eventSidebar .rift-title {
       font-size: 15px;
     }
 
-    #riftCard .rift-subtitle {
+    #eventSidebar .rift-subtitle {
       font-size: 11px;
       line-height: 1.35;
     }
 
-    #riftCard .rift-hero {
+    #eventSidebar .rift-hero {
       padding: 12px 13px;
       margin-bottom: 11px;
     }
 
-    #riftCard .rift-countdown-big {
+    #eventSidebar .rift-countdown-big {
       font-size: 24px;
     }
 
-    #riftCard .rift-window-value {
+    #eventSidebar .rift-window-value {
       font-size: 14px;
     }
 
-    #riftCard .rift-row {
+    #eventSidebar .rift-row {
       padding: 7px 2px;
       font-size: 12px;
     }
 
-    #riftCard .rift-row-day,
-    #riftCard .rift-row-cd {
+    #eventSidebar .rift-row-day,
+    #eventSidebar .rift-row-cd {
       font-size: 11px;
     }
 
-    #riftCard .rift-footer {
+    #eventSidebar .rift-footer {
       font-size: 10px;
       line-height: 1.45;
       margin-top: 11px;
@@ -433,11 +438,16 @@
       padding-right: 0;
     }
 
-    #riftCard {
+    #eventSidebar {
       position: static;
       width: auto;
       max-height: none;
       overflow: visible;
+      display: block;
+    }
+
+    #eventSidebar > div {
+      margin-bottom: 20px;
     }
   }
 </style>
