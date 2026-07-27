@@ -758,7 +758,7 @@ function getRiftWindows(count){
     RIFT_HOURS.forEach(h => {
       const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d, h, 0, 0, 0);
       const end = new Date(start.getTime() + RIFT_DURATION_MIN * 60000);
-      if (end > now){
+      if (start > now){
         const dayDiff = Math.floor((new Date(start.getFullYear(), start.getMonth(), start.getDate()) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
         const dayLabel = dayDiff === 0 ? "Aujourd'hui" : dayDiff === 1 ? 'Demain' : start.toLocaleDateString('fr-FR', { weekday: 'long' });
         windows.push({ start, end, dayLabel });
@@ -839,21 +839,8 @@ function renderRiftCard(){
   const timeFmt = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
   const next = windows[0];
-  let heroLabel = 'Prochain rift dans';
-  let heroCountdown = '—';
-  if (next){
-    const portalEndsAt = next.start.getTime() + RIFT_PORTAL_MIN * 60000;
-    if (now < next.start.getTime()){
-      heroLabel = 'Prochain rift dans';
-      heroCountdown = formatCountdown(next.start.getTime() - now);
-    } else if (now < portalEndsAt){
-      heroLabel = 'Portail ouvert — ferme dans';
-      heroCountdown = formatCountdown(portalEndsAt - now);
-    } else {
-      heroLabel = 'Portail fermé — event en cours, fin dans';
-      heroCountdown = formatCountdown(next.end.getTime() - now);
-    }
-  }
+  const heroLabel = 'Prochain rift dans';
+  const heroCountdown = next ? formatCountdown(next.start.getTime() - now) : '—';
 
   const rowsHtml = windows.map((w, i) => {
     const isNext = i === 0;
