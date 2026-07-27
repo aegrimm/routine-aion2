@@ -987,16 +987,21 @@ function renderEventCard(cfg){
   const next = windows[0];
   const heroCountdown = next ? formatCountdown(next.start.getTime() - now) : '—';
 
+  const REMINDER_VISIBLE_MS = 7 * 86400000;
   const rowsHtml = windows.map((w, i) => {
     const isNext = i === 0;
     const ts = w.start.getTime();
     const remKey = cfg.remKeyPrefix + ts;
     const armed = !!genericReminders[remKey];
+    const showBell = (ts - now) <= REMINDER_VISIBLE_MS;
+    const bellHtml = showBell
+      ? `<button class="rift-bell${armed ? ' armed' : ''}" title="${armed ? 'Rappel activé' : 'Activer un rappel'}" onclick="toggleGenericReminder('${remKey}', ${ts})">${armed ? '🔔' : '🔕'}</button>`
+      : '';
     return `<div class="rift-row${isNext ? ' is-next' : ''}">
       <div><span class="rift-row-time">${timeFmt(w.start)} - ${timeFmt(w.end)}</span><span class="rift-row-day">${w.dayLabel}</span></div>
       <div class="rift-row-right">
         <span class="rift-row-cd">${formatCountdownShort(ts - now)}</span>
-        <button class="rift-bell${armed ? ' armed' : ''}" title="${armed ? 'Rappel activé' : 'Activer un rappel'}" onclick="toggleGenericReminder('${remKey}', ${ts})">${armed ? '🔔' : '🔕'}</button>
+        ${bellHtml}
       </div>
     </div>`;
   }).join('');
