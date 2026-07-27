@@ -265,6 +265,9 @@
   .rift-row-day { color:#7c9fd4; font-size:12px; margin-left:8px; }
   .rift-row-cd { font-family:'Courier New', monospace; color:#8b8299; }
   .rift-footer { font-size:11px; color:#8b8299; font-style:italic; margin-top:14px; line-height:1.5; }
+  .rift-toggle-btn { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: #8b8299; border-radius: 8px; padding: 4px 10px; font-size: 12px; cursor: pointer; flex-shrink: 0; }
+  .rift-toggle-btn:hover { border-color: #c47ed4; color: #c47ed4; }
+  .rift-collapsed { width:min(100%,1180px); margin:0 auto 20px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 10px 18px; display:flex; align-items:center; justify-content:space-between; font-size: 13px; color: #8b8299; }
   .dash-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:14px 16px; min-width:0; }
   .dash-title { font-size:13px; font-weight:800; color:#dcd6e6; margin-bottom:10px; display:flex; justify-content:space-between; gap:10px; }
   .now-list,.char-progress-list { display:flex; flex-direction:column; gap:7px; }
@@ -624,9 +627,21 @@ function getRiftWindows(count){
   return windows.slice(0, count);
 }
 
+const RIFT_HIDDEN_KEY = 'aion2-rift-hidden';
+function toggleRiftCard(){
+  const hidden = !loadJSON(RIFT_HIDDEN_KEY, false);
+  saveJSON(RIFT_HIDDEN_KEY, hidden);
+  renderRiftCard();
+}
+
 function renderRiftCard(){
   const el = document.getElementById('riftCard');
   if (!el) return;
+  const isHidden = loadJSON(RIFT_HIDDEN_KEY, false);
+  if (isHidden){
+    el.innerHTML = `<div class="rift-collapsed"><span>⚡ Spacetime Rift masqué</span><button class="rift-toggle-btn" onclick="toggleRiftCard()">Réafficher</button></div>`;
+    return;
+  }
   const windows = getRiftWindows(8);
   const now = Date.now();
   const timeFmt = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -660,10 +675,11 @@ function renderRiftCard(){
     <div class="rift-card">
       <div class="rift-head">
         <div class="rift-icon">⚡</div>
-        <div>
+        <div style="flex:1">
           <div class="rift-title">Spacetime Rift</div>
           <div class="rift-subtitle">Toutes les 3 heures · L'event dure 1h, mais le portail n'est ouvert que 5 minutes</div>
         </div>
+        <button class="rift-toggle-btn" onclick="toggleRiftCard()" title="Masquer">✕</button>
       </div>
       <div class="rift-hero">
         <div>
