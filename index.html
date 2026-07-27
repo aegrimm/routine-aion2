@@ -313,6 +313,131 @@
   .toast.show { opacity:1; transform:none; }
   @media (max-width:780px){ .dashboard{grid-template-columns:1fr}.toolbar-spacer{display:none}.app-toolbar .tool-btn{flex:1 1 auto}.block-note-enhanced{padding-left:0}.history-row{grid-template-columns:90px 1fr auto} }
 
+
+
+  /* ===== Spacetime Rift : panneau latéral toujours visible ===== */
+  @media (min-width: 1400px) {
+    /* Le panneau Rift occupe la droite ; toute la largeur restante est donnée au contenu. */
+    body {
+      padding-left: 24px;
+      padding-right: 404px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding-right: 0;
+    }
+
+    /* Suppression des anciennes limites à 1180 px sur grand écran. */
+    .tabs,
+    .progress-box,
+    .summary-box,
+    .chips,
+    .edit-panel,
+    .app-toolbar,
+    .dashboard,
+    .reset-btn,
+    .footer-note,
+    .footer-copy {
+      width: 100%;
+      max-width: none;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #blocksContainer {
+      width: 100%;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px 24px;
+    }
+
+    #riftCard {
+      position: fixed;
+      z-index: 500;
+      top: 22px;
+      right: 22px;
+      width: 360px;
+      max-height: calc(100vh - 44px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+
+    #riftCard .rift-card,
+    #riftCard .rift-collapsed {
+      width: 100%;
+      margin: 0;
+      box-shadow: 0 18px 55px rgba(0,0,0,.42), 0 0 0 1px rgba(196,126,212,.06);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    #riftCard .rift-card {
+      padding: 15px 16px;
+    }
+
+    #riftCard .rift-head {
+      margin-bottom: 12px;
+    }
+
+    #riftCard .rift-title {
+      font-size: 15px;
+    }
+
+    #riftCard .rift-subtitle {
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    #riftCard .rift-hero {
+      padding: 12px 13px;
+      margin-bottom: 11px;
+    }
+
+    #riftCard .rift-countdown-big {
+      font-size: 24px;
+    }
+
+    #riftCard .rift-window-value {
+      font-size: 14px;
+    }
+
+    #riftCard .rift-row {
+      padding: 7px 2px;
+      font-size: 12px;
+    }
+
+    #riftCard .rift-row-day,
+    #riftCard .rift-row-cd {
+      font-size: 11px;
+    }
+
+    #riftCard .rift-footer {
+      font-size: 10px;
+      line-height: 1.45;
+      margin-top: 11px;
+    }
+  }
+
+  /* En dessous de 1400 px, le bloc revient dans le flux pour éviter tout chevauchement. */
+  @media (max-width: 1399px) {
+    body {
+      padding-right: 16px;
+    }
+
+    .wrap {
+      padding-right: 0;
+    }
+
+    #riftCard {
+      position: static;
+      width: auto;
+      max-height: none;
+      overflow: visible;
+    }
+  }
 </style>
 <script>
 const ICONS = {
