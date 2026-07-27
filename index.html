@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Routines les fous du bus — Aion 2</title>
 </head>
 <body>
@@ -37,7 +37,12 @@
   <div class="chips" id="charChips"></div>
   <div class="edit-panel" id="editPanel"></div>
 
+  <div class="app-toolbar" id="appToolbar"></div>
+  <div class="dashboard" id="dashboard"></div>
   <div id="blocksContainer"></div>
+  <div class="history-modal" id="historyModal" role="dialog" aria-modal="true" aria-label="Historique"><div class="modal-card" id="historyContent"></div></div>
+  <div class="toast" id="toast"></div>
+  <input type="file" id="importInput" accept="application/json" hidden />
 
   <button class="reset-btn" id="resetBtn" onclick="doReset()">↺ Réinitialiser <span id="resetLabel">la journée</span></button>
 
@@ -56,13 +61,6 @@
     padding: 28px 16px 60px;
   }
   .wrap { max-width: 720px; margin: 0 auto; }
-  @media (min-width: 980px) {
-    .wrap { max-width: 1180px; }
-    #blocksContainer { column-count: 2; column-width: 560px; column-gap: 40px; }
-    #blocksContainer .block { break-inside: avoid; margin-bottom: 18px; display: inline-block; width: 100%; }
-    .progress-box, .chips, .edit-panel, .summary-box, .reset-btn, .footer-note, .footer-copy { max-width: 720px; margin-left: auto; margin-right: auto; }
-    .reset-btn { display: block; }
-  }
   .logo-img { width: 96px; height: 96px; border-radius: 50%; display: block; margin: 0 auto 10px; box-shadow: 0 0 24px rgba(79,209,197,0.35); object-fit: cover; }
   .eyebrow { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 3px; color: #7c9fd4; text-transform: uppercase; margin-bottom: 8px; text-align: center; }
   h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(26px, 6vw, 38px); margin: 0; text-align: center;
@@ -87,7 +85,7 @@
   .summary-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
   .summary-item { font-size: 13px; color: #d8d3e0; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .summary-advice { font-size: 12px; color: #8b8299; margin-top: 2px; }
-  .chips { display: flex; gap: 8px; margin-bottom: 56px; flex-wrap: wrap; align-items: center; }
+  .chips { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
   .chip { padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.12); background: transparent;
           color: #8b8299; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s ease; }
   .chip.active { color: #4fd1c5; border-color: #4fd1c5; background: rgba(79,209,197,0.12); }
@@ -144,6 +142,148 @@
   .footer-copy { text-align: center; font-size: 11px; color: #3a3450; margin-top: 24px; }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-thumb { background: #322a49; border-radius: 3px; }
+
+
+  /* ===== Mise en page large écran ===== */
+  .wrap {
+    width: min(100%, 1480px);
+    max-width: 1480px;
+    margin-inline: auto;
+  }
+
+  /* Les éléments de pilotage restent lisibles sans devenir excessivement larges. */
+  .tabs,
+  .progress-box,
+  .summary-box,
+  .chips,
+  .edit-panel {
+    width: min(100%, 1180px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #blocksContainer {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 28px;
+    align-items: start;
+  }
+
+  .block {
+    min-width: 0;
+    margin-bottom: 0;
+  }
+
+  .block-body {
+    width: 100%;
+  }
+
+  .task-row {
+    flex-wrap: nowrap;
+  }
+
+  .task-label {
+    min-width: 0;
+  }
+
+  .char-slots {
+    flex: 0 0 auto;
+  }
+
+  .reset-btn,
+  .footer-note,
+  .footer-copy {
+    width: min(100%, 1180px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (max-width: 1100px) {
+    .wrap {
+      max-width: 760px;
+    }
+
+    #blocksContainer {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .block {
+      margin-bottom: 18px;
+    }
+  }
+
+  @media (max-width: 680px) {
+    body {
+      padding: 20px 12px 48px;
+    }
+
+    .task-row {
+      flex-wrap: wrap;
+    }
+
+    .char-slots {
+      width: 100%;
+      justify-content: flex-end;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .block-note,
+    .pvp-timer {
+      padding-left: 0;
+    }
+  }
+
+
+  /* ===== Optimisations avancées ===== */
+  :root { --panel: rgba(255,255,255,.035); --border: rgba(255,255,255,.09); }
+  button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid #4fd1c5; outline-offset: 3px; }
+  .app-toolbar { width:min(100%,1180px); margin:0 auto 18px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .tool-btn { border:1px solid var(--border); background:var(--panel); color:#aaa2b8; border-radius:10px; padding:8px 11px; cursor:pointer; font-size:12px; font-weight:650; }
+  .tool-btn:hover,.tool-btn.active { color:#4fd1c5; border-color:#4fd1c5; background:rgba(79,209,197,.1); }
+  .tool-btn.danger:hover { color:#e08a6a; border-color:#d4785a; background:rgba(212,120,90,.1); }
+  .toolbar-spacer { flex:1; }
+  .dashboard { width:min(100%,1180px); margin:0 auto 20px; display:grid; grid-template-columns:1.35fr 1fr; gap:14px; }
+  .dash-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:14px 16px; min-width:0; }
+  .dash-title { font-size:13px; font-weight:800; color:#dcd6e6; margin-bottom:10px; display:flex; justify-content:space-between; gap:10px; }
+  .now-list,.char-progress-list { display:flex; flex-direction:column; gap:7px; }
+  .now-item { display:flex; gap:8px; align-items:flex-start; font-size:12px; color:#b8b0c6; padding:7px 0; border-top:1px solid rgba(255,255,255,.05); }
+  .now-item:first-child { border-top:0; }
+  .now-priority { color:#4fd1c5; font-family:'Courier New',monospace; font-weight:800; min-width:18px; }
+  .now-empty { color:#5fc98d; font-size:12px; }
+  .char-progress-row { display:grid; grid-template-columns:minmax(86px,1fr) 2fr auto; gap:9px; align-items:center; font-size:11px; }
+  .mini-track { height:6px; border-radius:4px; overflow:hidden; background:rgba(255,255,255,.06); }
+  .mini-fill { height:100%; border-radius:4px; transition:width .25s ease; }
+  .mini-value { color:#8b8299; font-family:'Courier New',monospace; }
+  .block-note-enhanced { padding-left:42px; margin-bottom:8px; }
+  .block-note-enhanced details { color:#8b8299; font-size:12px; font-style:italic; }
+  .block-note-enhanced summary { cursor:pointer; color:#70677f; font-style:normal; user-select:none; }
+  .block-note-enhanced p { margin:7px 0 0; max-width:75ch; line-height:1.45; }
+  .countdown.is-soon { color:#e0a458; }
+  .countdown.is-urgent { color:#ff8585; }
+  .countdown.is-live { color:#5fc98d; animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity:.55; } }
+  .event-state { font-size:9px; border:1px solid currentColor; border-radius:999px; padding:2px 6px; margin-left:5px; vertical-align:1px; }
+  .compact .block { margin-bottom:10px; }
+  .compact .task-row { padding:7px 10px; }
+  .compact .block-head { margin-bottom:3px; }
+  .compact .block-note-enhanced { margin-bottom:4px; }
+  .compact .checkbox,.compact .miss-btn { height:25px; }
+  .compact .checkbox { width:25px; }
+  .compact .task-label { font-size:12px; }
+  .task-row.is-complete { opacity:.48; }
+  .hide-completed .task-row.is-complete { display:none; }
+  .history-modal { position:fixed; inset:0; z-index:9999; background:rgba(4,3,9,.82); display:none; align-items:center; justify-content:center; padding:18px; }
+  .history-modal.show { display:flex; }
+  .modal-card { width:min(680px,100%); max-height:80vh; overflow:auto; background:#151123; border:1px solid rgba(255,255,255,.14); border-radius:18px; padding:18px; box-shadow:0 24px 80px rgba(0,0,0,.5); }
+  .modal-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+  .modal-head h2 { margin:0; font-size:18px; }
+  .history-row { display:grid; grid-template-columns:110px 1fr auto; gap:10px; align-items:center; padding:9px 0; border-top:1px solid rgba(255,255,255,.06); font-size:12px; }
+  .toast { position:fixed; right:18px; bottom:18px; z-index:10000; background:#201a31; border:1px solid #4fd1c5; color:#dffaf7; border-radius:12px; padding:10px 14px; box-shadow:0 12px 40px rgba(0,0,0,.4); opacity:0; transform:translateY(12px); pointer-events:none; transition:.2s; font-size:12px; }
+  .toast.show { opacity:1; transform:none; }
+  @media (max-width:780px){ .dashboard{grid-template-columns:1fr}.toolbar-spacer{display:none}.app-toolbar .tool-btn{flex:1 1 auto}.block-note-enhanced{padding-left:0}.history-row{grid-template-columns:90px 1fr auto} }
+
 </style>
 <script>
 const ICONS = {
@@ -186,19 +326,19 @@ const DAILY_BLOCKS = [
   { id:'d4', priority:4, title:'Donjon Pet Soul', icon:'trophy',
     note:"Donjon Pet Soul uniquement (Genius Insight)",
     tasks:[{ id:'petsoul', label:'Donjon Pet Soul (Genius Insight)', chars:['main'], qty:{main:'1'} }] },
-  { id:'d7', priority:5, title:'PvP / Abyss', icon:'swords',
-    note:"Le plus flexible — à caser où ça t'arrange, aucune ressource limitée en jeu ici",
-    tasks:[{ id:'pvp', label:'Fenêtre PvP / Abyss', chars:['main'] }] },
-  { id:'d8', priority:6, title:'Dimensional Invasion', icon:'moon',
-    note:"Reset quotidien, 5 tentatives max · event de zone toutes les heures (à :30) · clés de récompense désormais partagées au niveau serveur",
-    tasks:[{ id:'dimensional', label:'Dimensional Invasion (5 tentatives)', chars:['main'], qty:{main:'5'} }] },
-  { id:'d6', priority:7, title:'Alts — boucle rapide', icon:'hammer',
+  { id:'d6', priority:5, title:'Alts — boucle rapide', icon:'hammer',
     note:"Objectif vitesse, pas perfection : un clear rapide et sale rapporte plus qu'un clear parfait trop long. Bottes/scrolls de vitesse recommandés.",
     tasks:[
       { id:'alt-expedition', label:'Expedition / Conquest (skip les mobs optionnels)', chars:['alt'], qty:{alt:'3,5-7'} },
       { id:'alt-firetemple', label:"Fire Temple Explore Mode — tant que l'alt est sous ~2200-2700 GS, sinon privilégier un autre donjon", chars:['alt'] },
       { id:'alt-enchant', label:'Enchanter/équiper les upgrades faciles avec le surplus de mats du main', chars:['alt'] },
     ]},
+  { id:'d8', priority:6, title:'Dimensional Invasion', icon:'moon',
+    note:"Reset quotidien, 5 tentatives max · event de zone toutes les heures (à :30) · clés de récompense désormais partagées au niveau serveur",
+    tasks:[{ id:'dimensional', label:'Dimensional Invasion (5 tentatives)', chars:['main'], qty:{main:'5'} }] },
+  { id:'d7', priority:7, title:'PvP / Abyss', icon:'swords',
+    note:"Le plus flexible — à caser où ça t'arrange, aucune ressource limitée en jeu ici",
+    tasks:[{ id:'pvp', label:'Fenêtre PvP / Abyss', chars:['main'] }] },
 ];
 
 const WEEKLY_BLOCKS = [
@@ -420,41 +560,27 @@ function getNextOccurrence(daysOfWeek, hour){
 }
 
 function formatCountdown(ms){
-  const totalMin = Math.floor(ms / 60000);
-  const days = Math.floor(totalMin / 1440);
-  const hours = Math.floor((totalMin % 1440) / 60);
-  const mins = totalMin % 60;
-  if (days > 0) return `${days}j ${hours}h ${mins}min`;
-  if (hours > 0) return `${hours}h ${mins}min`;
-  return `${mins}min`;
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const mins = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+  const pad = value => String(value).padStart(2, '0');
+
+  if (days > 0) return `${days}j ${pad(hours)}h ${pad(mins)}min ${pad(secs)}s`;
+  if (hours > 0) return `${pad(hours)}h ${pad(mins)}min ${pad(secs)}s`;
+  return `${pad(mins)}min ${pad(secs)}s`;
 }
 
-const REMINDER_ARMED_KEY = 'aion2-reminders-armed';
-let reminderArmed = loadJSON(REMINDER_ARMED_KEY, {});
+const reminderArmed = {};
 const timerIntervals = {};
 function armReminder(blockId, daysOfWeek, hour){
   if (!('Notification' in window)){ alert("Les notifications ne sont pas supportées par ce navigateur."); return; }
-  if (reminderArmed[blockId]){
-    reminderArmed[blockId] = false;
-    saveJSON(REMINDER_ARMED_KEY, reminderArmed);
-    render();
-    return;
-  }
   Notification.requestPermission().then(perm => {
     if (perm !== 'granted'){ alert("Permission refusée — impossible d'activer le rappel."); return; }
     reminderArmed[blockId] = true;
-    saveJSON(REMINDER_ARMED_KEY, reminderArmed);
     scheduleReminder(blockId, daysOfWeek, hour);
     render();
-  });
-}
-
-function restoreArmedReminders(){
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  WEEKLY_BLOCKS.forEach(block => {
-    if (block.pvpDays && reminderArmed[block.id]){
-      scheduleReminder(block.id, block.pvpDays, block.pvpHour);
-    }
   });
 }
 
@@ -602,7 +728,7 @@ function render(){
       };
       updateTimer();
       if (timerIntervals[block.id]) clearInterval(timerIntervals[block.id]);
-      timerIntervals[block.id] = setInterval(updateTimer, 30000);
+      timerIntervals[block.id] = setInterval(updateTimer, 1000);
     }
 
     const bodyEl = blockEl.querySelector(`#body-${block.id}`);
@@ -650,10 +776,185 @@ function render(){
   });
 }
 
+
+/* ===== Couche d'amélioration mono-fichier ===== */
+const APP_VERSION = 3;
+const SETTINGS_KEY = 'aion2-settings-v3';
+const HISTORY_KEY = 'aion2-history-v3';
+const BACKUP_KEY = 'aion2-last-backup-v3';
+let appSettings = loadJSON(SETTINGS_KEY, { compact:false, hideCompleted:false });
+let historyData = loadJSON(HISTORY_KEY, []);
+let enhancedTimerHandle = null;
+
+function migrateStorage(){
+  const current = Number(localStorage.getItem('aion2-app-version') || 0);
+  if (current < APP_VERSION){
+    try { localStorage.setItem(BACKUP_KEY, JSON.stringify(exportPayload())); } catch(e){}
+    localStorage.setItem('aion2-app-version', String(APP_VERSION));
+  }
+}
+function exportPayload(){
+  const data = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.startsWith('aion2-') && k !== BACKUP_KEY) data[k]=localStorage.getItem(k);
+  }
+  return { app:'Routines les fous du bus', version:APP_VERSION, exportedAt:new Date().toISOString(), data };
+}
+function exportData(){
+  const blob = new Blob([JSON.stringify(exportPayload(),null,2)], {type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`aion2-routines-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast('Sauvegarde exportée');
+}
+function importData(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const p=JSON.parse(reader.result);
+      if(!p || !p.data || typeof p.data!=='object') throw new Error('Format invalide');
+      localStorage.setItem(BACKUP_KEY, JSON.stringify(exportPayload()));
+      Object.entries(p.data).forEach(([k,v])=>{ if(k.startsWith('aion2-')) localStorage.setItem(k,String(v)); });
+      toast('Import terminé, rechargement…'); setTimeout(()=>location.reload(),600);
+    }catch(e){ alert('Import impossible : '+e.message); }
+  }; reader.readAsText(file);
+}
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1800); }
+function saveSettings(){ saveJSON(SETTINGS_KEY,appSettings); applySettings(); }
+function applySettings(){
+  document.documentElement.classList.toggle('compact',!!appSettings.compact);
+  document.documentElement.classList.toggle('hide-completed',!!appSettings.hideCompleted);
+}
+function toggleSetting(k){ appSettings[k]=!appSettings[k]; saveSettings(); render(); }
+
+function currentBlocks(){ return view==='daily'?DAILY_BLOCKS:WEEKLY_BLOCKS; }
+function currentChecked(){ return view==='daily'?dailyChecked:weeklyChecked; }
+function currentMissed(){ return view==='daily'?dailyMissed:weeklyMissed; }
+function storeCurrent(){
+  if(view==='daily'){ saveJSON(todayKey(),dailyChecked); saveJSON(missedKey(),dailyMissed); }
+  else { saveJSON(weekKey(),weeklyChecked); saveJSON(weeklyMissedKey(),weeklyMissed); }
+}
+function bulkSet(mode){
+  const checked=currentChecked(), missed=currentMissed();
+  currentBlocks().forEach(b=>b.tasks.forEach(t=>resolveTaskChars(t).forEach(cid=>{
+    if(activeChar!=='all' && cid!==activeChar) return;
+    const key=`${t.id}:${cid}`;
+    if(mode==='complete'){ checked[key]=true; missed[key]=false; }
+    else { delete checked[key]; delete missed[key]; }
+  })));
+  storeCurrent(); render(); toast(mode==='complete'?'Tâches validées':'Progression effacée');
+}
+function snapshotHistory(period){
+  const blocks=period==='daily'?DAILY_BLOCKS:WEEKLY_BLOCKS;
+  const checked=period==='daily'?dailyChecked:weeklyChecked;
+  const total=countSlots(blocks); let done=0;
+  blocks.forEach(b=>b.tasks.forEach(t=>resolveTaskChars(t).forEach(cid=>{if(checked[`${t.id}:${cid}`])done++;})));
+  historyData.unshift({date:new Date().toISOString(),period,done,total,pct:total?Math.round(done/total*100):0});
+  historyData=historyData.slice(0,30); saveJSON(HISTORY_KEY,historyData);
+}
+const originalDoReset=doReset;
+doReset=function(){
+  snapshotHistory(view);
+  localStorage.setItem(BACKUP_KEY,JSON.stringify(exportPayload()));
+  originalDoReset(); toast('Progression archivée puis réinitialisée');
+};
+function showHistory(){
+  const modal=document.getElementById('historyModal'), box=document.getElementById('historyContent');
+  const rows=historyData.length?historyData.map(h=>`<div class="history-row"><span>${new Date(h.date).toLocaleDateString('fr-FR')}</span><div class="mini-track"><div class="mini-fill" style="width:${h.pct}%;background:#7c9fd4"></div></div><strong>${h.done}/${h.total} · ${h.pct}%</strong></div>`).join(''):'<div class="now-empty">Aucun historique. Il sera créé lors des réinitialisations.</div>';
+  box.innerHTML=`<div class="modal-head"><h2>Historique des 30 derniers resets</h2><button class="tool-btn" onclick="closeHistory()">Fermer</button></div>${rows}`;
+  modal.classList.add('show');
+}
+function closeHistory(){ document.getElementById('historyModal').classList.remove('show'); }
+
+document.getElementById('historyModal').addEventListener('click',e=>{if(e.target.id==='historyModal')closeHistory();});
+document.getElementById('importInput').addEventListener('change',e=>{if(e.target.files[0])importData(e.target.files[0]);});
+
+function renderToolbar(){
+  const bar=document.getElementById('appToolbar');
+  bar.innerHTML=`
+    <button class="tool-btn ${appSettings.compact?'active':''}" onclick="toggleSetting('compact')">↕ Mode compact</button>
+    <button class="tool-btn ${appSettings.hideCompleted?'active':''}" onclick="toggleSetting('hideCompleted')">✓ Masquer terminées</button>
+    <button class="tool-btn" onclick="bulkSet('complete')">Tout valider${activeChar==='all'?'':' — '+getChar(activeChar).name}</button>
+    <button class="tool-btn danger" onclick="bulkSet('reset')">Effacer${activeChar==='all'?'':' — '+getChar(activeChar).name}</button>
+    <span class="toolbar-spacer"></span>
+    <button class="tool-btn" onclick="showHistory()">Historique</button>
+    <button class="tool-btn" onclick="exportData()">Exporter JSON</button>
+    <button class="tool-btn" onclick="document.getElementById('importInput').click()">Importer</button>`;
+}
+function buildNowItems(blocks,checked,visibleChars){
+  const items=[];
+  blocks.forEach(b=>b.tasks.forEach(t=>{
+    const remaining=resolveTaskChars(t).filter(cid=>visibleChars.includes(cid)&&!checked[`${t.id}:${cid}`]);
+    if(remaining.length) items.push({p:b.priority||99,title:b.title,label:t.label,chars:remaining.map(cid=>getChar(cid).name).join(', ')});
+  }));
+  return items.sort((a,b)=>a.p-b.p).slice(0,6);
+}
+function renderDashboard(){
+  const blocks=currentBlocks(), checked=currentChecked();
+  const visible=activeChar==='all'?CHARACTERS.map(c=>c.id):[activeChar];
+  const now=buildNowItems(blocks,checked,visible);
+  const nowHtml=now.length?now.map(x=>`<div class="now-item"><span class="now-priority">${x.p}</span><div><strong>${x.title}</strong> — ${x.label}<div class="summary-advice">${x.chars}</div></div></div>`).join(''):'<div class="now-empty">Tout est terminé pour cette vue.</div>';
+  const charHtml=CHARACTERS.map(c=>{
+    let total=0,done=0; blocks.forEach(b=>b.tasks.forEach(t=>{if(resolveTaskChars(t).includes(c.id)){total++;if(checked[`${t.id}:${c.id}`])done++;}}));
+    const pct=total?Math.round(done/total*100):0, dc=getChar(c.id);
+    return `<div class="char-progress-row"><span style="color:${dc.color};font-weight:700">${dc.name}</span><div class="mini-track"><div class="mini-fill" style="width:${pct}%;background:${dc.color}"></div></div><span class="mini-value">${done}/${total}</span></div>`;
+  }).join('');
+  document.getElementById('dashboard').innerHTML=`<div class="dash-card"><div class="dash-title"><span>À faire maintenant</span><span>${now.length} priorité(s)</span></div><div class="now-list">${nowHtml}</div></div><div class="dash-card"><div class="dash-title"><span>Progression par personnage</span><span>${view==='daily'?'Jour':'Semaine'}</span></div><div class="char-progress-list">${charHtml}</div></div>`;
+}
+function enhanceTaskRows(){
+  document.querySelectorAll('.task-row').forEach(row=>{
+    const buttons=[...row.querySelectorAll('.checkbox')];
+    const complete=buttons.length>0&&buttons.every(b=>b.classList.contains('checked'));
+    row.classList.toggle('is-complete',complete);
+  });
+}
+function enhanceNotes(){
+  document.querySelectorAll('.block-note').forEach(note=>{
+    if(note.parentElement.classList.contains('block-note-enhanced'))return;
+    const text=note.textContent; const wrap=document.createElement('div'); wrap.className='block-note-enhanced';
+    wrap.innerHTML=`<details><summary>ⓘ Conseils et récompenses</summary><p>${text}</p></details>`;
+    note.replaceWith(wrap);
+  });
+}
+function getEventState(block){
+  const now=new Date(), duration=(block.pvpDuration||120)*60000;
+  for(let back=0;back<8;back++){
+    const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()-back,block.pvpHour,0,0,0);
+    if(block.pvpDays.includes(start.getDay())&&now>=start&&now<new Date(start.getTime()+duration)) return {state:'live',target:new Date(start.getTime()+duration),label:'EN COURS'};
+  }
+  const target=getNextOccurrence(block.pvpDays,block.pvpHour);
+  return {state:'next',target,label:'À VENIR'};
+}
+function refreshEnhancedTimers(){
+  const all=[...DAILY_BLOCKS,...WEEKLY_BLOCKS].filter(b=>b.pvpDays);
+  all.forEach(block=>{
+    const el=document.getElementById(`timer-${block.id}`); if(!el)return;
+    if(timerIntervals[block.id]){clearInterval(timerIntervals[block.id]);delete timerIntervals[block.id];}
+    const ev=getEventState(block); if(!ev.target)return;
+    const ms=ev.target-Date.now(), cd=formatCountdown(ms);
+    let cls=''; if(ev.state==='live')cls='is-live'; else if(ms<=3600000)cls='is-urgent'; else if(ms<=86400000)cls='is-soon';
+    const armed=reminderArmed[block.id];
+    el.innerHTML=`<span class="countdown ${cls}">⏱ ${ev.state==='live'?'Fin dans':'Prochain event dans'} ${cd}<span class="event-state">${ev.label}</span></span><button class="remind-btn${armed?' armed':''}" onclick="armReminder('${block.id}',[${block.pvpDays}],${block.pvpHour})">${armed?'🔔 Rappel actif':'🔕 Activer le rappel'}</button>`;
+  });
+}
+const originalRender=render;
+render=function(){
+  originalRender(); applySettings(); renderToolbar(); renderDashboard(); enhanceNotes(); enhanceTaskRows();
+  document.querySelector('.progress-track')?.setAttribute('role','progressbar');
+  const pv=document.getElementById('progressVal')?.textContent.match(/(\d+)\/(\d+)/);
+  if(pv){const t=document.querySelector('.progress-track');t.setAttribute('aria-valuemin','0');t.setAttribute('aria-valuemax',pv[2]);t.setAttribute('aria-valuenow',pv[1]);}
+  refreshEnhancedTimers();
+};
+
+migrateStorage(); applySettings();
 document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+document.getElementById('tabDaily').setAttribute('role','tab'); document.getElementById('tabWeekly').setAttribute('role','tab');
+document.querySelector('.tabs').setAttribute('role','tablist');
 render();
-restoreArmedReminders();
+enhancedTimerHandle=setInterval(refreshEnhancedTimers,1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshEnhancedTimers();});
+
 </script>
 </body>
 </html>
