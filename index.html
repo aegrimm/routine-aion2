@@ -57,7 +57,7 @@
   }
   .wrap { max-width: 720px; margin: 0 auto; }
   @media (min-width: 980px) {
-    .wrap { max-width: 1180px; }
+    .wrap { max-width: min(1600px, 92vw); }
     #blocksContainer { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; align-items: start; }
     #blocksContainer .block { margin-bottom: 18px; }
     .chips, .edit-panel, .progress-box, .summary-box, .footer-note, .footer-copy { max-width: 720px; margin-left: auto; margin-right: auto; }
