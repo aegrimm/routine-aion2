@@ -57,9 +57,11 @@
   }
   .wrap { max-width: 720px; margin: 0 auto; }
   @media (min-width: 980px) {
-    .wrap { max-width: min(1600px, 92vw); }
-    #blocksContainer { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; align-items: start; }
+    .wrap { max-width: 1180px; }
+    #blocksContainer { display: grid; grid-template-columns: repeat(2, minmax(0, 560px)); gap: 4px 40px; justify-content: center; align-items: start; }
     #blocksContainer .block { margin-bottom: 18px; }
+    .progress-box, .chips, .edit-panel, .summary-box, .reset-btn, .footer-note, .footer-copy { max-width: 720px; margin-left: auto; margin-right: auto; }
+    .reset-btn { display: block; }
   }
   .logo-img { width: 96px; height: 96px; border-radius: 50%; display: block; margin: 0 auto 10px; box-shadow: 0 0 24px rgba(79,209,197,0.35); object-fit: cover; }
   .eyebrow { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 3px; color: #7c9fd4; text-transform: uppercase; margin-bottom: 8px; text-align: center; }
