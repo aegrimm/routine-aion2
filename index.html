@@ -38,6 +38,7 @@
   <div class="edit-panel" id="editPanel"></div>
 
   <div class="app-toolbar" id="appToolbar"></div>
+  <div id="riftCard"></div>
   <div class="dashboard" id="dashboard"></div>
   <div id="blocksContainer"></div>
   <div class="history-modal" id="historyModal" role="dialog" aria-modal="true" aria-label="Historique"><div class="modal-card" id="historyContent"></div></div>
@@ -245,6 +246,25 @@
   .tool-btn.danger:hover { color:#e08a6a; border-color:#d4785a; background:rgba(212,120,90,.1); }
   .toolbar-spacer { flex:1; }
   .dashboard { width:min(100%,1180px); margin:0 auto 20px; display:grid; grid-template-columns:1.35fr 1fr; gap:14px; }
+  .rift-card { width:min(100%,1180px); margin:0 auto 20px; background: rgba(196,126,212,0.06); border: 1px solid rgba(196,126,212,0.25); border-radius: 16px; padding: 18px 20px; }
+  .rift-head { display:flex; align-items:center; gap:12px; margin-bottom: 16px; }
+  .rift-icon { width:36px; height:36px; border-radius:10px; background: rgba(196,126,212,0.15); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .rift-title { font-size:16px; font-weight:700; color:#e8e3f0; }
+  .rift-subtitle { font-size:12px; color:#8b8299; margin-top:2px; }
+  .rift-hero { display:flex; justify-content:space-between; align-items:flex-end; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px 18px; margin-bottom: 14px; flex-wrap:wrap; gap:10px; }
+  .rift-next-label { font-size:11px; color:#8b8299; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+  .rift-countdown-big { font-family:'Courier New', monospace; font-size:28px; font-weight:800; color:#c47ed4; }
+  .rift-window-label { font-size:11px; color:#8b8299; text-align:right; margin-bottom:4px; }
+  .rift-window-value { font-size:16px; font-weight:700; color:#e8e3f0; text-align:right; }
+  .rift-window-day { font-size:12px; color:#7c9fd4; text-align:right; }
+  .rift-list-title { font-size:11px; color:#8b8299; letter-spacing:1px; text-transform:uppercase; margin: 10px 0 8px; }
+  .rift-row { display:flex; justify-content:space-between; align-items:center; padding:8px 4px; border-top:1px solid rgba(255,255,255,0.05); font-size:13px; }
+  .rift-row:first-child { border-top:none; }
+  .rift-row.is-next .rift-row-cd { color:#c47ed4; font-weight:700; }
+  .rift-row-time { color:#e8e3f0; font-weight:600; }
+  .rift-row-day { color:#7c9fd4; font-size:12px; margin-left:8px; }
+  .rift-row-cd { font-family:'Courier New', monospace; color:#8b8299; }
+  .rift-footer { font-size:11px; color:#8b8299; font-style:italic; margin-top:14px; line-height:1.5; }
   .dash-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:14px 16px; min-width:0; }
   .dash-title { font-size:13px; font-weight:800; color:#dcd6e6; margin-bottom:10px; display:flex; justify-content:space-between; gap:10px; }
   .now-list,.char-progress-list { display:flex; flex-direction:column; gap:7px; }
@@ -570,6 +590,96 @@ function formatCountdown(ms){
   if (days > 0) return `${days}j ${pad(hours)}h ${pad(mins)}min ${pad(secs)}s`;
   if (hours > 0) return `${pad(hours)}h ${pad(mins)}min ${pad(secs)}s`;
   return `${pad(mins)}min ${pad(secs)}s`;
+}
+
+const RIFT_HOURS = [2, 5, 8, 11, 14, 17, 20, 23];
+const RIFT_PORTAL_MIN = 5;
+const RIFT_DURATION_MIN = 60;
+
+function formatCountdownShort(ms){
+  const totalMin = Math.max(0, Math.floor(ms / 60000));
+  const days = Math.floor(totalMin / 1440);
+  const hours = Math.floor((totalMin % 1440) / 60);
+  const mins = totalMin % 60;
+  if (days > 0) return `${days}j ${hours}h`;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}
+
+function getRiftWindows(count){
+  const now = new Date();
+  const windows = [];
+  for (let d = 0; windows.length < count && d < 4; d++){
+    RIFT_HOURS.forEach(h => {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d, h, 0, 0, 0);
+      const end = new Date(start.getTime() + RIFT_DURATION_MIN * 60000);
+      if (end > now){
+        const dayDiff = Math.floor((new Date(start.getFullYear(), start.getMonth(), start.getDate()) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+        const dayLabel = dayDiff === 0 ? "Aujourd'hui" : dayDiff === 1 ? 'Demain' : start.toLocaleDateString('fr-FR', { weekday: 'long' });
+        windows.push({ start, end, dayLabel });
+      }
+    });
+  }
+  windows.sort((a, b) => a.start - b.start);
+  return windows.slice(0, count);
+}
+
+function renderRiftCard(){
+  const el = document.getElementById('riftCard');
+  if (!el) return;
+  const windows = getRiftWindows(8);
+  const now = Date.now();
+  const timeFmt = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  const next = windows[0];
+  let heroLabel = 'Prochain rift dans';
+  let heroCountdown = '—';
+  if (next){
+    const portalEndsAt = next.start.getTime() + RIFT_PORTAL_MIN * 60000;
+    if (now < next.start.getTime()){
+      heroLabel = 'Prochain rift dans';
+      heroCountdown = formatCountdown(next.start.getTime() - now);
+    } else if (now < portalEndsAt){
+      heroLabel = 'Portail ouvert — ferme dans';
+      heroCountdown = formatCountdown(portalEndsAt - now);
+    } else {
+      heroLabel = 'Portail fermé — event en cours, fin dans';
+      heroCountdown = formatCountdown(next.end.getTime() - now);
+    }
+  }
+
+  const rowsHtml = windows.map((w, i) => {
+    const isNext = i === 0;
+    return `<div class="rift-row${isNext ? ' is-next' : ''}">
+      <div><span class="rift-row-time">${timeFmt(w.start)} - ${timeFmt(w.end)}</span><span class="rift-row-day">${w.dayLabel}</span></div>
+      <span class="rift-row-cd">${formatCountdownShort(w.start.getTime() - now)}</span>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="rift-card">
+      <div class="rift-head">
+        <div class="rift-icon">⚡</div>
+        <div>
+          <div class="rift-title">Spacetime Rift</div>
+          <div class="rift-subtitle">Toutes les 3 heures · L'event dure 1h, mais le portail n'est ouvert que 5 minutes</div>
+        </div>
+      </div>
+      <div class="rift-hero">
+        <div>
+          <div class="rift-next-label">${heroLabel}</div>
+          <div class="rift-countdown-big">${heroCountdown}</div>
+        </div>
+        ${next ? `<div>
+          <div class="rift-window-label">Prochaine fenêtre</div>
+          <div class="rift-window-value">${timeFmt(next.start)} - ${timeFmt(next.end)}</div>
+          <div class="rift-window-day">${next.dayLabel}</div>
+        </div>` : ''}
+      </div>
+      <div class="rift-list-title">Prochaines fenêtres</div>
+      ${rowsHtml}
+      <div class="rift-footer">Le portail pour entrer dans le Spacetime Rift ne reste ouvert que 5 minutes au début de chaque fenêtre. Une fois dedans, l'event dure 1h complète. Activités : combat PvP, Sealed Dungeons, quêtes spéciales et récompenses en points Abyss.</div>
+    </div>`;
 }
 
 const reminderArmed = {};
@@ -944,6 +1054,7 @@ render=function(){
   const pv=document.getElementById('progressVal')?.textContent.match(/(\d+)\/(\d+)/);
   if(pv){const t=document.querySelector('.progress-track');t.setAttribute('aria-valuemin','0');t.setAttribute('aria-valuemax',pv[2]);t.setAttribute('aria-valuenow',pv[1]);}
   refreshEnhancedTimers();
+  renderRiftCard();
 };
 
 migrateStorage(); applySettings();
@@ -953,6 +1064,7 @@ document.getElementById('tabDaily').setAttribute('role','tab'); document.getElem
 document.querySelector('.tabs').setAttribute('role','tablist');
 render();
 enhancedTimerHandle=setInterval(refreshEnhancedTimers,1000);
+setInterval(renderRiftCard,1000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshEnhancedTimers();});
 
 </script>
