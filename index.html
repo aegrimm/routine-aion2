@@ -1228,11 +1228,6 @@ function enhanceNotes(){
   });
 }
 function getEventState(block){
-  const now=new Date(), duration=(block.pvpDuration||120)*60000;
-  for(let back=0;back<8;back++){
-    const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()-back,block.pvpHour,0,0,0);
-    if(block.pvpDays.includes(start.getDay())&&now>=start&&now<new Date(start.getTime()+duration)) return {state:'live',target:new Date(start.getTime()+duration),label:'EN COURS'};
-  }
   const target=getNextOccurrence(block.pvpDays,block.pvpHour);
   return {state:'next',target,label:'À VENIR'};
 }
