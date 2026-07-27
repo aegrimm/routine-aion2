@@ -455,7 +455,7 @@ function render(){
   const missedStore = view === 'daily' ? dailyMissed : weeklyMissed;
   const total = countSlots(blocks);
   let done = 0;
-  blocks.forEach(b => b.tasks.forEach(t => t.chars.forEach(cid => { if (checked[`${t.id}:${cid}`]) done++; })));
+  blocks.forEach(b => b.tasks.forEach(t => resolveTaskChars(t).forEach(cid => { if (checked[`${t.id}:${cid}`]) done++; })));
   const pct = total ? Math.round((done/total)*100) : 0;
 
   document.getElementById('progressVal').textContent = `${done}/${total} · ${pct}%`;
