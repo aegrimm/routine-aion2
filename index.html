@@ -713,14 +713,14 @@ const WEEKLY_BLOCKS = [
     note:"PvP par matching, niveau 45+ et Item Level 3000+ requis — voir la carte dédiée en haut de page pour le compte à rebours",
     tasks:[{ id:'abyss-rift', label:'Abyss Rift Zone', chars:['main'], qty:{main:'2'} }] },
   { id:'w4', priority:9, time:'Avant reset mercredi 5h', title:'Boutiques & caps à vider', icon:'shoppingbag',
-    note:"Toujours en dernier, juste avant le reset · Odyle Energy cap 560 (840 avec abonnement), régénère 15/3h · budget hebdo total ≈1000/perso (régén + 4 jetons perso) + 640 jetons partagés serveur à répartir · les jetons Wind Breeze se craft désormais, ne s'achètent plus en boutique",
+    note:"Toujours en dernier, juste avant le reset · Odyle Energy cap 560 (840 avec abonnement), régénère ~15/3h (840/semaine/perso) · le main récupère TOUS les jetons serveur (32 = 16 Shop + 16 Substance Morph, réservés au main uniquement) + ses 8 jetons perso (4 Shop + 4 Morph) = 40 jetons/semaine · chaque alt ne garde que ses 8 jetons perso (4 Shop + 4 Morph)",
     tasks:[
       { id:'shop-nightmare', label:'Boutique Dream Fragments (Nightmare)', chars:['main'] },
       { id:'shop-parcho-pve', label:'Achat Parchemin de Quête PvE', chars:['main'] },
       { id:'shop-parcho-pvp', label:'Achat Parchemin de Quête PvP', chars:['main'] },
       { id:'shop-transcendence', label:'Boutique hebdo Transcendence/Arcana', chars:['main'] },
-      { id:'wind-breeze', label:'Craft les 4 Jetons Odyle Energy perso (40 energy chacun)', chars:['main','alt'] },
-      { id:'wind-breeze-share', label:'Craft les 16 Jetons Odyle Energy partagés serveur (à mettre sur le main)', chars:['main'] },
+      { id:'wind-breeze', label:'Craft les 8 Jetons Odyle Energy perso (4 Shop + 4 Substance Morph, 40 energy chacun)', chars:['main','alt'] },
+      { id:'wind-breeze-share', label:'Craft les 32 Jetons Odyle Energy partagés serveur (16 Shop + 16 Substance Morph, réservés au main)', chars:['main'] },
       { id:'odyle-cap', label:'Vérifier le cap Odyle Energy (max 560/840)', chars:['main','alt'] },
     ]},
 ];
@@ -1797,6 +1797,10 @@ function renderDashboard(){
       </label>
     </div>
     ${odyleRowsHtml}
+    <div style="font-size:10px;color:#8b8299;line-height:1.5;margin-top:6px;">
+      <span style="color:#e0a458;">⚠ Seuil de dégradation :</span> au-delà de 84 clears cumulés/semaine sur le compte, le Kinah gagné baisse progressivement (jusqu'à -80%). Avec abonnement (80 energy/run) : Main ≈30 runs, chaque alt ≈14 runs.
+      <br><span style="color:#4fd1c5;">Optimal F2P :</span> 3 alts (main + 3) donne ≈72 runs cumulés — reste sous le seuil. Un 4ᵉ alt ferait dépasser les 84 (≈86 runs).
+    </div>
   </div>`;
   document.getElementById('dashboard').innerHTML=`<div class="dash-card"><div class="dash-title"><span>À faire maintenant</span><span>${now.length} priorité(s)</span></div><div class="now-list">${nowHtml}</div></div><div class="dash-card"><div class="dash-title"><span>Progression par personnage</span><span>${view==='daily'?'Jour':'Semaine'}</span></div><div class="char-progress-list">${charHtml}</div>${odyleHtml}</div>`;
 }
