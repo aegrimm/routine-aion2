@@ -376,6 +376,18 @@
       gap: 16px;
     }
 
+    #odyleEnergyCard {
+      position: fixed;
+      z-index: 500;
+      top: 22px;
+      left: 22px;
+      width: 340px;
+      max-height: calc(100vh - 44px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+
     #eventSidebar .rift-card,
     #eventSidebar .rift-collapsed {
       width: 100%;
@@ -426,6 +438,34 @@
     }
 
     #eventSidebar .rift-footer {
+      font-size: 10px;
+      line-height: 1.45;
+      margin-top: 11px;
+    }
+
+    #odyleEnergyCard .rift-card,
+    #odyleEnergyCard .rift-collapsed {
+      width: 100%;
+      margin: 0;
+      box-shadow: 0 10px 24px rgba(0,0,0,.42), 0 0 0 1px rgba(196,126,212,.06);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    #odyleEnergyCard .rift-card {
+      padding: 15px 16px;
+    }
+
+    #odyleEnergyCard .rift-title {
+      font-size: 15px;
+    }
+
+    #odyleEnergyCard .rift-subtitle {
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    #odyleEnergyCard .rift-footer {
       font-size: 10px;
       line-height: 1.45;
       margin-top: 11px;
@@ -579,6 +619,11 @@
     #eventSidebar {
       right: max(70px, calc((100vw - 1910px) / 2));
       width: 360px;
+    }
+
+    #odyleEnergyCard {
+      left: max(70px, calc((100vw - 1910px) / 2));
+      width: 340px;
     }
   }
 
