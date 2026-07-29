@@ -15,6 +15,7 @@
   <h1>Routines les fous du bus</h1>
   <div class="date" id="dateLabel"></div>
 
+  <div id="resetBanner"></div>
   <div class="tabs">
     <button class="tab active" id="tabDaily" onclick="setView('daily')">Quotidien</button>
     <button class="tab" id="tabWeekly" onclick="setView('weekly')">Hebdomadaire</button>
@@ -79,6 +80,12 @@
        -webkit-text-fill-color: transparent; letter-spacing: 1px; }
   .date { color: #8b8299; font-size: 14px; margin-top: 6px; text-align: center; }
   .tabs { display: flex; gap: 10px; margin: 18px 0; }
+  .reset-banner { font-family:'Courier New',monospace; background:#0f0d1a; border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:12px 16px; display:flex; gap:20px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .reset-item { display:flex; align-items:center; gap:10px; }
+  .reset-icon { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .reset-label { font-size:10px; color:#8b8299; letter-spacing:.5px; }
+  .reset-value { font-size:13px; font-weight:700; }
+  .reset-sep { width:1px; height:24px; background:rgba(255,255,255,.08); }
   .tab { flex: 1; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: transparent;
          color: #8b8299; font-size: 14px; font-weight: 700; cursor: pointer; font-family: Georgia, 'Times New Roman', serif; letter-spacing: 0.5px; }
   .tab.active { border-color: #4fd1c5; background: rgba(79,209,197,0.12); color: #4fd1c5; }
@@ -1826,7 +1833,38 @@ function updateRiftClock(){const card=document.querySelector('#riftCard .rift-ca
 
 const renderBefore813=render;
 render=function(){renderBefore813();renderWeeklyPlanner();enhanceContextLinks();enhanceCharacterEditor();renderRiftCard();};
-function masterTick(){refreshEnhancedTimers();updateRiftClock();renderAllEventCards();if(new Date().getSeconds()===0){renderWeeklyPlanner();renderRiftCard();}}
+function formatResetCountdown(ms){
+  const s = Math.max(0, Math.floor(ms/1000));
+  const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60);
+  return d > 0 ? `${d}j ${h}h` : `${h}h ${m}min`;
+}
+function nextResetAt(hour, targetDay){
+  const now = new Date();
+  for (let i = 0; i < 8; i++){
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate()+i, hour, 0, 0, 0);
+    if (d > now && (targetDay === undefined || d.getDay() === targetDay)) return d;
+  }
+}
+function renderResetBanner(){
+  const el = document.getElementById('resetBanner');
+  if (!el) return;
+  const now = new Date();
+  const daily = formatResetCountdown(nextResetAt(5) - now);
+  const weekly = formatResetCountdown(nextResetAt(5, 3) - now);
+  el.innerHTML = `
+    <div class="reset-banner">
+      <div class="reset-item">
+        <div class="reset-icon" style="background:rgba(79,209,197,.15);">🌙</div>
+        <div><div class="reset-label">RESET QUOTIDIEN</div><div class="reset-value" style="color:#4fd1c5;">dans ${daily}</div></div>
+      </div>
+      <div class="reset-sep"></div>
+      <div class="reset-item">
+        <div class="reset-icon" style="background:rgba(196,126,212,.15);">🗓</div>
+        <div><div class="reset-label">RESET HEBDO (MER. 5H)</div><div class="reset-value" style="color:#c47ed4;">dans ${weekly}</div></div>
+      </div>
+    </div>`;
+}
+function masterTick(){refreshEnhancedTimers();updateRiftClock();renderAllEventCards();renderResetBanner();if(new Date().getSeconds()===0){renderWeeklyPlanner();renderRiftCard();}}
 
 migrateStorage(); applySettings();
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -1834,6 +1872,7 @@ document.getElementById('dateLabel').textContent = new Date().toLocaleDateString
 document.getElementById('tabDaily').setAttribute('role','tab'); document.getElementById('tabWeekly').setAttribute('role','tab');
 document.querySelector('.tabs').setAttribute('role','tablist');
 render();
+renderResetBanner();
 enhancedTimerHandle=setInterval(masterTick,1000);
 restoreRiftReminders();
 restoreGenericReminders();
