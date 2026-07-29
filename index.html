@@ -1720,7 +1720,11 @@ function renderDashboard(){
     return `<div style="margin-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
         <span style="font-size:12px;font-weight:700;color:${dc.color};">${dc.name}</span>
-        <span style="font-size:11px;color:var(--text-secondary,#8b8299);font-family:'Courier New',monospace;">${val} / ${odyleCap}</span>
+        <span style="display:flex;align-items:center;gap:4px;">
+          <input type="number" min="0" max="${odyleCap}" step="1" value="${val}" onchange="setOdyleEnergy('${dc.id}', this.value)"
+            style="width:52px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:2px 4px;color:#e8e3f0;font-size:11px;font-family:'Courier New',monospace;text-align:right;" />
+          <span style="font-size:11px;color:var(--text-secondary,#8b8299);font-family:'Courier New',monospace;">/ ${odyleCap}</span>
+        </span>
       </div>
       <input type="range" min="0" max="${odyleCap}" step="5" value="${val}" oninput="setOdyleEnergy('${dc.id}', this.value)" style="width:100%;accent-color:${dc.color};margin-bottom:2px;" />
       <div style="font-size:10px;color:${remaining === 0 ? '#5fc98d' : '#8b8299'};">${label}</div>
