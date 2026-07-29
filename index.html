@@ -803,10 +803,11 @@ function pullFromCloud(code){
     const remote = snap.data().data || {};
     for (let i = localStorage.length - 1; i >= 0; i--){
       const k = localStorage.key(i);
-      if (k && k.startsWith('aion2-') && k !== SYNC_CODE_KEY) localStorage.removeItem(k);
+      if (k && k.startsWith('aion2-') && k !== SYNC_CODE_KEY && k !== SYNC_HISTORY_KEY) localStorage.removeItem(k);
     }
-    Object.entries(remote).forEach(([k, v]) => localStorage.setItem(k, v));
+    Object.entries(remote).forEach(([k, v]) => { if (k !== SYNC_HISTORY_KEY) localStorage.setItem(k, v); });
     localStorage.setItem(SYNC_CODE_KEY, code);
+    addToSyncHistory(code);
     location.reload();
   }).catch(err => {
     console.error('Erreur de récupération', err);
@@ -822,10 +823,25 @@ function generateSyncCode(){
   return `${w}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+const SYNC_HISTORY_KEY = 'aion2-sync-history';
+
+function addToSyncHistory(code){
+  let history = loadJSON(SYNC_HISTORY_KEY, []);
+  history = history.filter(h => h.code !== code);
+  history.unshift({ code, date: new Date().toLocaleDateString('fr-FR') });
+  history = history.slice(0, 5);
+  try { localStorage.setItem(SYNC_HISTORY_KEY, JSON.stringify(history)); } catch(e){}
+}
+
+function getSyncHistory(){
+  return loadJSON(SYNC_HISTORY_KEY, []);
+}
+
 function createNewSyncCode(){
   const code = generateSyncCode();
   syncCode = code;
   localStorage.setItem(SYNC_CODE_KEY, code);
+  addToSyncHistory(code);
   pushToCloud();
   renderSyncPanel();
 }
@@ -857,14 +873,25 @@ function renderSyncPanel(){
   if (!syncPanelOpen){ el.innerHTML = ''; el.style.display = 'none'; return; }
   el.style.display = 'block';
   const statusLabel = { idle: '', syncing: 'Synchronisation...', synced: 'Synchronisé ✓', error: 'Erreur de synchro' }[cloudSyncStatus] || '';
+  const history = getSyncHistory().filter(h => h.code !== syncCode);
+  const historyHtml = history.length ? `
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.07);">
+      <div style="font-size:10px;color:#544b68;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Codes utilisés sur cet appareil</div>
+      ${history.map(h => `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;">
+        <span style="font-family:'Courier New',monospace;color:#8b8299;">${h.code}</span>
+        <span style="color:#544b68;font-size:10px;">${h.date}</span>
+      </div>`).join('')}
+      <div style="font-size:10px;color:#544b68;font-style:italic;margin-top:4px;">Note ce code ailleurs si tu veux le garder — rien ne le sauvegarde en dehors de cet appareil.</div>
+    </div>` : '';
   if (syncCode){
     el.innerHTML = `
       <div class="sync-card">
         <div class="sync-title">🔗 Synchronisation active</div>
         <div class="sync-code-display">${syncCode}</div>
         <div class="sync-status">${statusLabel}</div>
-        <div class="sync-hint">Utilise ce code sur un autre appareil pour retrouver tes données ici.</div>
+        <div class="sync-hint">Utilise ce code sur un autre appareil pour retrouver tes données ici. Note-le quelque part — il ne peut pas être récupéré s'il est perdu.</div>
         <button class="rift-toggle-btn" onclick="leaveSyncCode()" style="width:100%;margin-top:8px;">Arrêter la synchro</button>
+        ${historyHtml}
       </div>`;
   } else {
     el.innerHTML = `
@@ -876,6 +903,7 @@ function renderSyncPanel(){
           <input type="text" id="syncCodeInput" placeholder="Coller un code existant" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:6px 8px;color:#e8e3f0;font-size:12px;" />
           <button class="rift-toggle-btn" onclick="joinSyncCode()">Rejoindre</button>
         </div>
+        ${historyHtml}
       </div>`;
   }
 }
