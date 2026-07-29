@@ -6,6 +6,12 @@
 <title>Routines les fous du bus — Aion 2</title>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f0d1a">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fous du Bus">
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -1991,6 +1997,11 @@ document.getElementById('tabDaily').setAttribute('role','tab'); document.getElem
 document.querySelector('.tabs').setAttribute('role','tablist');
 applyTheme();
 initParticleBackground();
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW registration failed', err));
+  });
+}
 render();
 renderResetBanner();
 enhancedTimerHandle=setInterval(masterTick,1000);
