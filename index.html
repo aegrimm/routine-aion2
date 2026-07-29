@@ -45,7 +45,6 @@
     <div id="bossWedSatCard"></div>
     <div id="bossFriSunCard"></div>
   </div>
-  <div id="odyleEnergyCard"></div>
   <div class="dashboard" id="dashboard"></div>
   <div class="weekly-planner" id="weeklyPlanner"></div>
   <div id="blocksContainer"></div>
@@ -1189,73 +1188,17 @@ const ODYLE_ENERGY_KEY = 'aion2-odyle-energy';
 const ODYLE_SUB_KEY = 'aion2-odyle-sub';
 let odyleEnergy = loadJSON(ODYLE_ENERGY_KEY, {});
 let odyleSub = loadJSON(ODYLE_SUB_KEY, false);
-let odyleHidden = loadJSON('aion2-odyle-hidden', false);
 
 function setOdyleEnergy(charId, value){
   odyleEnergy[charId] = Math.max(0, Math.min(840, parseInt(value) || 0));
   saveJSON(ODYLE_ENERGY_KEY, odyleEnergy);
-  renderOdyleCard();
+  renderDashboard();
 }
 
 function toggleOdyleSub(){
   odyleSub = !odyleSub;
   saveJSON(ODYLE_SUB_KEY, odyleSub);
-  renderOdyleCard();
-}
-
-function toggleOdyleCard(){
-  odyleHidden = !odyleHidden;
-  saveJSON('aion2-odyle-hidden', odyleHidden);
-  renderOdyleCard();
-}
-
-function renderOdyleCard(){
-  const el = document.getElementById('odyleEnergyCard');
-  if (!el) return;
-  if (odyleHidden){
-    el.innerHTML = `<div class="rift-collapsed"><span>🔋 Odyle Energy masqué</span><button class="rift-toggle-btn" onclick="toggleOdyleCard()">Réafficher</button></div>`;
-    return;
-  }
-  const cap = odyleSub ? 840 : 560;
-  const rowsHtml = CHARACTERS.map(base => {
-    const c = getChar(base.id);
-    const val = Math.min(odyleEnergy[c.id] || 0, cap);
-    const pct = Math.min(100, Math.round((val / cap) * 100));
-    const remaining = Math.max(0, cap - val);
-    const hoursToCap = remaining / 5;
-    const h = Math.floor(hoursToCap);
-    const m = Math.round((hoursToCap - h) * 60);
-    const label = remaining === 0 ? 'Plafond atteint' : (h > 0 ? `${h}h ${m}min avant plafond` : `${m}min avant plafond`);
-    return `<div style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-        <span style="font-size:13px;font-weight:700;color:${c.color};">${c.name}</span>
-        <span style="font-size:12px;color:#e8e3f0;font-family:'Courier New',monospace;">${val} / ${cap}</span>
-      </div>
-      <div style="height:6px;background:#0f0d1a;border-radius:3px;overflow:hidden;margin-bottom:5px;">
-        <div style="height:100%;width:${pct}%;background:${c.color};"></div>
-      </div>
-      <input type="range" min="0" max="${cap}" step="5" value="${val}" oninput="setOdyleEnergy('${c.id}', this.value)" style="width:100%;accent-color:${c.color};margin-bottom:4px;" />
-      <div style="font-size:10px;color:${remaining === 0 ? '#5fc98d' : '#8b8299'};">${label}</div>
-    </div>`;
-  }).join('');
-
-  el.innerHTML = `
-    <div class="rift-card">
-      <div class="rift-head">
-        <div class="rift-icon">🔋</div>
-        <div style="flex:1">
-          <div class="rift-title">Odyle Energy</div>
-          <div class="rift-subtitle">Régénère 15 energy / 3h · Cap ${cap} (${odyleSub ? 'abonnement actif' : 'sans abonnement'})</div>
-        </div>
-        <button class="rift-toggle-btn" onclick="toggleOdyleCard()" title="Masquer">✕</button>
-      </div>
-      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#8b8299;margin-bottom:14px;cursor:pointer;">
-        <input type="checkbox" ${odyleSub ? 'checked' : ''} onchange="toggleOdyleSub()" style="accent-color:#c47ed4;width:14px;height:14px;" />
-        Abonnement actif (cap 840 au lieu de 560)
-      </label>
-      ${rowsHtml}
-      <div class="rift-footer">Ajuste les curseurs après chaque session pour garder une estimation à jour. Le calcul de temps avant plafond suppose que tu ne dépenses plus d'énergie entre-temps.</div>
-    </div>`;
+  renderDashboard();
 }
 
 const reminderArmed = {};
@@ -1586,7 +1529,36 @@ function renderDashboard(){
     const pct=total?Math.round(done/total*100):0, dc=getChar(c.id);
     return `<div class="char-progress-row"><span style="color:${dc.color};font-weight:700">${dc.name}</span><div class="mini-track"><div class="mini-fill" style="width:${pct}%;background:${dc.color}"></div></div><span class="mini-value">${done}/${total}</span></div>`;
   }).join('');
-  document.getElementById('dashboard').innerHTML=`<div class="dash-card"><div class="dash-title"><span>À faire maintenant</span><span>${now.length} priorité(s)</span></div><div class="now-list">${nowHtml}</div></div><div class="dash-card"><div class="dash-title"><span>Progression par personnage</span><span>${view==='daily'?'Jour':'Semaine'}</span></div><div class="char-progress-list">${charHtml}</div></div>`;
+  const odyleCap = odyleSub ? 840 : 560;
+  const odyleRowsHtml = CHARACTERS.map(base => {
+    const dc = getChar(base.id);
+    const val = Math.min(odyleEnergy[dc.id] || 0, odyleCap);
+    const pct = Math.min(100, Math.round((val / odyleCap) * 100));
+    const remaining = Math.max(0, odyleCap - val);
+    const hoursToCap = remaining / 5;
+    const h = Math.floor(hoursToCap);
+    const m = Math.round((hoursToCap - h) * 60);
+    const label = remaining === 0 ? 'Plafond atteint' : (h > 0 ? `${h}h ${m}min avant plafond` : `${m}min avant plafond`);
+    return `<div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+        <span style="font-size:12px;font-weight:700;color:${dc.color};">${dc.name}</span>
+        <span style="font-size:11px;color:var(--text-secondary,#8b8299);font-family:'Courier New',monospace;">${val} / ${odyleCap}</span>
+      </div>
+      <input type="range" min="0" max="${odyleCap}" step="5" value="${val}" oninput="setOdyleEnergy('${dc.id}', this.value)" style="width:100%;accent-color:${dc.color};margin-bottom:2px;" />
+      <div style="font-size:10px;color:${remaining === 0 ? '#5fc98d' : '#8b8299'};">${label}</div>
+    </div>`;
+  }).join('');
+  const odyleHtml = `<div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.07);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-size:12px;font-weight:700;color:#e8e3f0;">🔋 Odyle Energy</span>
+      <label style="display:flex;align-items:center;gap:5px;font-size:10px;color:#8b8299;cursor:pointer;">
+        <input type="checkbox" ${odyleSub ? 'checked' : ''} onchange="toggleOdyleSub()" style="accent-color:#c47ed4;width:12px;height:12px;" />
+        Abonnement
+      </label>
+    </div>
+    ${odyleRowsHtml}
+  </div>`;
+  document.getElementById('dashboard').innerHTML=`<div class="dash-card"><div class="dash-title"><span>À faire maintenant</span><span>${now.length} priorité(s)</span></div><div class="now-list">${nowHtml}</div></div><div class="dash-card"><div class="dash-title"><span>Progression par personnage</span><span>${view==='daily'?'Jour':'Semaine'}</span></div><div class="char-progress-list">${charHtml}</div>${odyleHtml}</div>`;
 }
 function enhanceTaskRows(){
   document.querySelectorAll('.task-row').forEach(row=>{
@@ -1628,7 +1600,6 @@ render=function(){
   refreshEnhancedTimers();
   renderRiftCard();
   renderAllEventCards();
-  renderOdyleCard();
 };
 
 
