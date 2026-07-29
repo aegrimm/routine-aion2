@@ -67,21 +67,21 @@
     --theme-accent: #4fd1c5; --theme-accent2: #7c9fd4; --theme-accent3: #c47ed4;
     --theme-card-bg: rgba(196,126,212,0.06); --theme-card-border: rgba(196,126,212,0.25);
     --theme-radius-card: 16px; --theme-radius-inner: 12px; --theme-border-w: 1px;
-    --theme-eyebrow: #7c9fd4;
+    --theme-eyebrow: #7c9fd4; --theme-highlight: #c47ed4;
   }
   body[data-theme="amber"] {
     --theme-bg1: #1c1810; --theme-bg2: #120f08; --theme-bg3: #0c0a06;
     --theme-accent: #e0bd5f; --theme-accent2: #b89a4a; --theme-accent3: #e6e1d2;
     --theme-card-bg: rgba(224,189,95,0.06); --theme-card-border: #4a3c1f;
     --theme-radius-card: 12px; --theme-radius-inner: 12px; --theme-border-w: 1px;
-    --theme-eyebrow: #c9ad6a;
+    --theme-eyebrow: #c9ad6a; --theme-highlight: #c9524a;
   }
   body[data-theme="ice"] {
     --theme-bg1: #0f1c26; --theme-bg2: #0a1218; --theme-bg3: #070d11;
     --theme-accent: #4fc3e8; --theme-accent2: #5a8cc4; --theme-accent3: #4fc3e8;
     --theme-card-bg: rgba(79,195,232,0.05); --theme-card-border: #1e3442;
     --theme-radius-card: 10px; --theme-radius-inner: 10px; --theme-border-w: 1px;
-    --theme-eyebrow: #7ba3b8;
+    --theme-eyebrow: #7ba3b8; --theme-highlight: #8a7ad4;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
@@ -298,7 +298,7 @@
   .rift-subtitle { font-size:12px; color:#8b8299; margin-top:2px; }
   .rift-hero { display:flex; justify-content:space-between; align-items:flex-end; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px 18px; margin-bottom: 14px; flex-wrap:wrap; gap:10px; }
   .rift-next-label { font-size:11px; color:#8b8299; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
-  .rift-countdown-big { font-family:'Courier New', monospace; font-size:28px; font-weight:800; color:#c47ed4; }
+  .rift-countdown-big { font-family:'Courier New', monospace; font-size:28px; font-weight:800; color:var(--theme-highlight); }
   .rift-window-label { font-size:11px; color:#8b8299; text-align:right; margin-bottom:4px; }
   .rift-window-value { font-size:16px; font-weight:700; color:#e8e3f0; text-align:right; }
   .rift-window-day { font-size:12px; color:#7c9fd4; text-align:right; }
