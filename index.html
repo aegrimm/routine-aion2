@@ -42,6 +42,8 @@
     <div id="riftCard"></div>
     <div id="artifactCard"></div>
     <div id="abyssRiftCard"></div>
+    <div id="bossWedSatCard"></div>
+    <div id="bossFriSunCard"></div>
   </div>
   <div class="dashboard" id="dashboard"></div>
   <div class="weekly-planner" id="weeklyPlanner"></div>
@@ -1029,26 +1031,40 @@ const EVENT_CONFIGS = [
     containerId: 'artifactCard', hiddenKey: 'aion2-artifact-hidden', remKeyPrefix: 'artifact:',
     icon: '👥', title: 'Artifact Conquest (Siège)',
     subtitle: 'Mercredi & samedi 16h (heure FR) · PvP de siège programmé',
-    daysOfWeek: [3, 6], hour: 16, durationMin: 120,
+    daysOfWeek: [3, 6], hour: 16, minute: 0, durationMin: 120,
     footer: "Horaire converti depuis 22h heure serveur Taïwan (-6h). Siège territorial en groupe."
   },
   {
     containerId: 'abyssRiftCard', hiddenKey: 'aion2-abyssrift-hidden', remKeyPrefix: 'abyssrift:',
     icon: '⚔️', title: 'Abyss Rift Zone',
     subtitle: 'Mardi & jeudi 16h (heure FR) · PvP par matching',
-    daysOfWeek: [2, 4], hour: 16, durationMin: 120,
+    daysOfWeek: [2, 4], hour: 16, minute: 0, durationMin: 120,
     footer: "Niveau 45+ et Item Level 3000+ requis. Horaire converti depuis 22h heure serveur Taïwan (-6h)."
+  },
+  {
+    containerId: 'bossWedSatCard', hiddenKey: 'aion2-bosswedsat-hidden', remKeyPrefix: 'bosswedsat:',
+    icon: '💀', title: 'Boss Reshanta (Mer/Sam)',
+    subtitle: 'Mercredi & samedi 16h30 (heure FR) · Executor Argo/Kaira/Tamasa, Executioner Dramos, Ravager Marakha, Turncoat Ducal',
+    daysOfWeek: [3, 6], hour: 16, minute: 30, durationMin: 30,
+    footer: "Source : tracker communautaire (aion2hub.com), data-miné donc à prendre avec prudence. Horaire converti depuis 22h30 heure serveur Taïwan (-6h)."
+  },
+  {
+    containerId: 'bossFriSunCard', hiddenKey: 'aion2-bossfrisun-hidden', remKeyPrefix: 'bossfrisun:',
+    icon: '💀', title: 'Boss Reshanta (Ven/Dim)',
+    subtitle: 'Vendredi & dimanche 16h (heure FR) · Abyss Siege Boss, Enraged Guardian Lord Nahma',
+    daysOfWeek: [5, 0], hour: 16, minute: 0, durationMin: 30,
+    footer: "Source : tracker communautaire (aion2hub.com), data-miné donc à prendre avec prudence. Horaire converti depuis 22h heure serveur Taïwan (-6h). Watcher Kaira spawn en plus toutes les 60min sans horaire fixe."
   },
 ];
 
 let genericReminders = loadJSON('aion2-generic-reminders', {});
 const genericReminderTimeouts = {};
 
-function getWeeklyEventWindows(daysOfWeek, hour, durationMin, count){
+function getWeeklyEventWindows(daysOfWeek, hour, minute, durationMin, count){
   const now = new Date();
   const windows = [];
   for (let d = 0; windows.length < count && d < 21; d++){
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d, hour, 0, 0, 0);
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d, hour, minute || 0, 0, 0);
     if (daysOfWeek.includes(start.getDay()) && start > now){
       const end = new Date(start.getTime() + durationMin * 60000);
       const dayLabel = d === 0 ? "Aujourd'hui" : d === 1 ? 'Demain' : start.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' });
@@ -1110,7 +1126,7 @@ function renderEventCard(cfg){
     el.innerHTML = `<div class="rift-collapsed"><span>${cfg.icon} ${cfg.title} masqué</span><button class="rift-toggle-btn" onclick="toggleEventCard('${cfg.hiddenKey}')">Réafficher</button></div>`;
     return;
   }
-  const windows = getWeeklyEventWindows(cfg.daysOfWeek, cfg.hour, cfg.durationMin, 2);
+  const windows = getWeeklyEventWindows(cfg.daysOfWeek, cfg.hour, cfg.minute, cfg.durationMin, 2);
   const now = Date.now();
   const timeFmt = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   const next = windows[0];
