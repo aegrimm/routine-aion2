@@ -37,9 +37,6 @@
   </div>
 
   <div class="chips" id="charChips"></div>
-  <div style="width:min(100%,1180px);margin:0 auto;display:flex;justify-content:flex-end;">
-    <button class="edit-btn" onclick="toggleSyncPanel()" title="Synchronisation multi-appareils" style="margin:-4px 0 10px;">🔗 Synchro</button>
-  </div>
   <div id="syncPanel"></div>
   <div class="edit-panel" id="editPanel"></div>
 
@@ -1466,6 +1463,14 @@ function render(){
   editBtn.title = 'Choisir la classe des personnages';
   editBtn.onclick = toggleEditPanel;
   chipsEl.appendChild(editBtn);
+
+  const syncBtn = document.createElement('button');
+  syncBtn.className = 'edit-btn';
+  syncBtn.innerHTML = '🔗 Synchro';
+  syncBtn.title = 'Synchronisation multi-appareils';
+  syncBtn.style.marginLeft = 'auto';
+  syncBtn.onclick = toggleSyncPanel;
+  chipsEl.appendChild(syncBtn);
 
   const editPanel = document.getElementById('editPanel');
   editPanel.classList.toggle('show', editingNames);
