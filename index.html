@@ -533,6 +533,52 @@
   .compact .rift-slot-chip { padding:3px 4px; font-size:7px; border-radius:5px; }
   .compact .rift-details summary { font-size:8px; margin-top:5px; }
 
+
+
+  /* ===== Largeur fixe desktop / ultrawide =====
+     Le contenu principal ne s'étire plus au-delà de 1480 px.
+     Le panneau événements reste fixé à droite du contenu, dans un shell total de 1888 px. */
+  @media (min-width: 1400px) {
+    body {
+      padding: 28px 24px 60px;
+    }
+
+    .wrap {
+      width: min(1480px, calc(100vw - 432px));
+      max-width: 1480px;
+      margin-left: max(24px, calc((100vw - 1888px) / 2 + 24px));
+      margin-right: 0;
+      padding-right: 0;
+    }
+
+    .tabs,
+    .progress-box,
+    .summary-box,
+    .chips,
+    .edit-panel,
+    .app-toolbar,
+    .dashboard,
+    .reset-btn,
+    .footer-note,
+    .footer-copy {
+      width: 100%;
+      max-width: none;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #blocksContainer {
+      width: 100%;
+      max-width: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #eventSidebar {
+      right: max(24px, calc((100vw - 1888px) / 2 + 24px));
+      width: 360px;
+    }
+  }
+
 </style>
 <script>
 const ICONS = {
