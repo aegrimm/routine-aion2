@@ -537,7 +537,7 @@
 
   /* ===== Largeur fixe desktop / ultrawide =====
      Le contenu principal ne s'étire plus au-delà de 1480 px.
-     Le panneau événements reste fixé à droite du contenu, dans un shell total de 1888 px. */
+     Le panneau événements reste fixé à droite du contenu, dans un shell total de 1864 px (1480 + 24 + 360). */
   @media (min-width: 1400px) {
     body {
       padding: 28px 24px 60px;
@@ -546,7 +546,7 @@
     .wrap {
       width: min(1480px, calc(100vw - 432px));
       max-width: 1480px;
-      margin-left: max(24px, calc((100vw - 1888px) / 2 + 24px));
+      margin-left: max(24px, calc((100vw - 1864px) / 2));
       margin-right: 0;
       padding-right: 0;
     }
@@ -574,7 +574,7 @@
     }
 
     #eventSidebar {
-      right: max(24px, calc((100vw - 1888px) / 2 + 24px));
+      right: max(24px, calc((100vw - 1864px) / 2));
       width: 360px;
     }
   }
