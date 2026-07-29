@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Routines les fous du bus — Aion 2</title>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <section>
@@ -35,6 +37,8 @@
   </div>
 
   <div class="chips" id="charChips"></div>
+  <button class="edit-btn" onclick="toggleSyncPanel()" title="Synchronisation multi-appareils" style="margin:-4px 0 10px;">🔗 Synchro</button>
+  <div id="syncPanel"></div>
   <div class="edit-panel" id="editPanel"></div>
 
   <div class="app-toolbar" id="appToolbar"></div>
@@ -256,6 +260,11 @@
   .toolbar-spacer { flex:1; }
   .dashboard { width:min(100%,1180px); margin:0 auto 20px; display:grid; grid-template-columns:1.35fr 1fr; gap:14px; }
   .rift-card { width:min(100%,1180px); margin:0 auto 20px; background: rgba(196,126,212,0.06); border: 1px solid rgba(196,126,212,0.25); border-radius: 16px; padding: 18px 20px; }
+  .sync-card { background: rgba(79,209,197,0.06); border: 1px solid rgba(79,209,197,0.25); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
+  .sync-title { font-size: 14px; font-weight: 700; color: #e8e3f0; margin-bottom: 8px; }
+  .sync-code-display { font-family: 'Courier New', monospace; font-size: 16px; font-weight: 700; color: #4fd1c5; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 8px 12px; text-align: center; margin-bottom: 6px; }
+  .sync-status { font-size: 11px; color: #8b8299; text-align: center; margin-bottom: 6px; }
+  .sync-hint { font-size: 11px; color: #8b8299; line-height: 1.5; }
   .rift-head { display:flex; align-items:center; gap:12px; margin-bottom: 16px; }
   .rift-icon { width:36px; height:36px; border-radius:10px; background: rgba(196,126,212,0.15); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
   .rift-title { font-size:16px; font-weight:700; color:#e8e3f0; }
@@ -735,6 +744,140 @@ function loadJSON(key, fallback){
 }
 function saveJSON(key, val){
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){ console.error('Erreur de sauvegarde', e); }
+  queueCloudPush();
+}
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCcfWoW_0IWkAopHrlXnKUiZJViss9FSpU",
+  authDomain: "routine-aion-2.firebaseapp.com",
+  projectId: "routine-aion-2",
+  storageBucket: "routine-aion-2.firebasestorage.app",
+  messagingSenderId: "400230415217",
+  appId: "1:400230415217:web:c75da7cea4b0305f4014d0"
+};
+let fbDb = null;
+try { firebase.initializeApp(firebaseConfig); fbDb = firebase.firestore(); } catch(e){ console.error('Firebase init error', e); }
+
+const SYNC_CODE_KEY = 'aion2-sync-code';
+let syncCode = localStorage.getItem(SYNC_CODE_KEY) || null;
+let cloudPushTimer = null;
+let cloudSyncStatus = 'idle';
+
+function collectLocalAionData(){
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i);
+    if (k && k.startsWith('aion2-') && k !== SYNC_CODE_KEY){
+      data[k] = localStorage.getItem(k);
+    }
+  }
+  return data;
+}
+
+function queueCloudPush(){
+  if (!syncCode || !fbDb) return;
+  if (cloudPushTimer) clearTimeout(cloudPushTimer);
+  cloudPushTimer = setTimeout(pushToCloud, 1200);
+}
+
+function pushToCloud(){
+  if (!syncCode || !fbDb) return;
+  cloudSyncStatus = 'syncing';
+  renderSyncPanel();
+  fbDb.collection('syncCodes').doc(syncCode).set({ data: collectLocalAionData(), updatedAt: Date.now() })
+    .then(() => { cloudSyncStatus = 'synced'; renderSyncPanel(); })
+    .catch(err => { console.error('Erreur de synchronisation', err); cloudSyncStatus = 'error'; renderSyncPanel(); });
+}
+
+function pullFromCloud(code){
+  if (!fbDb) return;
+  cloudSyncStatus = 'syncing';
+  renderSyncPanel();
+  fbDb.collection('syncCodes').doc(code).get().then(snap => {
+    if (!snap.exists){
+      alert("Aucune donnée trouvée pour ce code. Vérifie qu'il est correct, ou crée un nouveau code.");
+      cloudSyncStatus = 'idle';
+      renderSyncPanel();
+      return;
+    }
+    const remote = snap.data().data || {};
+    for (let i = localStorage.length - 1; i >= 0; i--){
+      const k = localStorage.key(i);
+      if (k && k.startsWith('aion2-') && k !== SYNC_CODE_KEY) localStorage.removeItem(k);
+    }
+    Object.entries(remote).forEach(([k, v]) => localStorage.setItem(k, v));
+    localStorage.setItem(SYNC_CODE_KEY, code);
+    location.reload();
+  }).catch(err => {
+    console.error('Erreur de récupération', err);
+    alert("Impossible de récupérer les données. Vérifie ta connexion et réessaie.");
+    cloudSyncStatus = 'idle';
+    renderSyncPanel();
+  });
+}
+
+function generateSyncCode(){
+  const words = ['zilly','chimicz','hyperion','coubo','aegrim','templar','ranger','glad','bus','fous','abyss','reshanta'];
+  const w = words[Math.floor(Math.random() * words.length)];
+  return `${w}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function createNewSyncCode(){
+  const code = generateSyncCode();
+  syncCode = code;
+  localStorage.setItem(SYNC_CODE_KEY, code);
+  pushToCloud();
+  renderSyncPanel();
+}
+
+function joinSyncCode(){
+  const input = document.getElementById('syncCodeInput');
+  const code = input ? input.value.trim() : '';
+  if (!code){ alert('Entre un code de synchronisation.'); return; }
+  if (!confirm("Ça va remplacer toutes tes données locales actuelles par celles du code entré. Continuer ?")) return;
+  pullFromCloud(code);
+}
+
+function leaveSyncCode(){
+  if (!confirm("Arrêter la synchronisation ? Tes données restent sur cet appareil mais ne seront plus synchronisées.")) return;
+  syncCode = null;
+  localStorage.removeItem(SYNC_CODE_KEY);
+  renderSyncPanel();
+}
+
+let syncPanelOpen = false;
+function toggleSyncPanel(){
+  syncPanelOpen = !syncPanelOpen;
+  renderSyncPanel();
+}
+
+function renderSyncPanel(){
+  const el = document.getElementById('syncPanel');
+  if (!el) return;
+  if (!syncPanelOpen){ el.innerHTML = ''; el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  const statusLabel = { idle: '', syncing: 'Synchronisation...', synced: 'Synchronisé ✓', error: 'Erreur de synchro' }[cloudSyncStatus] || '';
+  if (syncCode){
+    el.innerHTML = `
+      <div class="sync-card">
+        <div class="sync-title">🔗 Synchronisation active</div>
+        <div class="sync-code-display">${syncCode}</div>
+        <div class="sync-status">${statusLabel}</div>
+        <div class="sync-hint">Utilise ce code sur un autre appareil pour retrouver tes données ici.</div>
+        <button class="rift-toggle-btn" onclick="leaveSyncCode()" style="width:100%;margin-top:8px;">Arrêter la synchro</button>
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div class="sync-card">
+        <div class="sync-title">🔗 Synchronisation</div>
+        <div class="sync-hint">Crée un code pour synchroniser tes données entre appareils, ou rejoins un code existant.</div>
+        <button class="rift-toggle-btn" onclick="createNewSyncCode()" style="width:100%;margin:8px 0;">+ Créer un nouveau code</button>
+        <div style="display:flex;gap:6px;margin-top:4px;">
+          <input type="text" id="syncCodeInput" placeholder="Coller un code existant" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:6px 8px;color:#e8e3f0;font-size:12px;" />
+          <button class="rift-toggle-btn" onclick="joinSyncCode()">Rejoindre</button>
+        </div>
+      </div>`;
+  }
 }
 
 let view = 'daily';
@@ -1655,6 +1798,10 @@ render();
 enhancedTimerHandle=setInterval(masterTick,1000);
 restoreRiftReminders();
 restoreGenericReminders();
+if (syncCode && !sessionStorage.getItem('aion2-synced-this-session')){
+  sessionStorage.setItem('aion2-synced-this-session', '1');
+  pullFromCloud(syncCode);
+}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshEnhancedTimers();});
 
 </script>
